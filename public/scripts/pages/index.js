@@ -1,6 +1,8 @@
-import { auth } from '../common/firebaseConfig.js';
+import { initializeFirebase } from '../common/firebaseConfig.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const { auth } = await initializeFirebase(); // Dynamically fetch auth from firebaseConfig.js
+
     const startButton = document.querySelector('.start-button');
     const testButton = document.querySelector('.test-button');
 
