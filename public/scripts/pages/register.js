@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     confirmButton.addEventListener('click', () => {
         confirmationPopup.classList.add('hidden');
         console.log(`User ${pendingCredential.user.email} confirmed registration`);
-        window.location.href = '/learnhub.html';
+        window.location.href = '/mainpage.html';
     });
 
     cancelButton.addEventListener('click', () => {

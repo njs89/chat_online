@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
             login(email, password)
                 .then(() => {
                     console.log('User logged in successfully');
-                    window.location.href = '/learnhub.html'; // Redirect to learnhub.html upon successful login
+                    window.location.href = '/mainpage.html'; // Redirect to learnhub.html upon successful login
                 })
                 .catch(error => {
                     console.error('Login failed:', error.message);
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             registerWithGoogle()
                 .then(() => {
                     console.log('User logged in with Google successfully');
-                    window.location.href = '/learnhub.html'; // Redirect to learnhub.html upon successful login
+                    window.location.href = '/mainpage.html'; // Redirect to learnhub.html upon successful login
                 })
                 .catch(error => {
                     console.error('Google Login Failed:', error.message);
