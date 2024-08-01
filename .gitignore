@@ -1,0 +1,11 @@
+# openai key
+*.env
+
+#node_modules
+node_modules/
+
+# tokens
+/passwords
+
+#icon for now
+/favicon_io
