@@ -1,0 +1,231 @@
+:root {
+    --company-color: #800020;
+    --company-color-hover: #a00030;
+}
+
+/* General Reset */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: white;
+    color: #333;
+}
+
+/* Header */
+.header {
+    background-color: var(--company-color);
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+/* Buttons */
+.button, #editProfileButton, #logoutButton {
+    background-color: var(--company-color);
+    color: white;
+    padding: 15px 30px;
+    margin: 10px 0;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    width: 200px;
+    border: none;
+    cursor: pointer;
+}
+
+.button:hover, #editProfileButton:hover, #logoutButton:hover {
+    background-color: var(--company-color-hover);
+}
+
+/* User Profile */
+#userProfile {
+    width: 100%;
+    max-width: 600px;
+    border: 1px solid var(--company-color);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#profileData p {
+    margin: 10px 0;
+}
+
+/* Image Carousel */
+.carousel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.carousel-button {
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+#carouselImage {
+    max-width: 300px;
+    max-height: 300px;
+    object-fit: cover;
+    margin: 0 10px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 5px;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Form Styles */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    margin-top: 10px;
+}
+
+form input, form select, form textarea {
+    margin-bottom: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+form button {
+    background-color: var(--company-color);
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+form button:hover {
+    background-color: var(--company-color-hover);
+}
+
+/* Current Images Display */
+#currentImages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.image-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.delete-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(255, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+
+    .main-content {
+        padding: 20px 10px;
+    }
+
+    #userProfile {
+        width: 100%;
+    }
+
+    .carousel {
+        flex-direction: column;
+    }
+
+    #carouselImage {
+        max-width: 100%;
+        margin: 10px 0;
+    }
+
+    .carousel-button {
+        margin: 5px 0;
+    }
+
+    .button, #editProfileButton, #logoutButton {
+        width: 100%;
+    }
+}
