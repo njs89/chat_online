@@ -1,4 +1,6 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+
 
 export function register(auth, email, password) {
     return createUserWithEmailAndPassword(auth, email, password)
@@ -29,4 +31,17 @@ export function logout(auth) {
         .catch(error => {
             console.error('Logout Error:', error.code, error.message);
         });
+}
+
+export async function updateUserProfile(user, name, gender, hobbies, aboutYou) {
+    const db = getFirestore();
+    
+    await updateProfile(user, { displayName: name });
+    
+    await setDoc(doc(db, "users", user.uid), {
+        name: name,
+        gender: gender,
+        hobbies: hobbies,
+        aboutYou: aboutYou
+    });
 }

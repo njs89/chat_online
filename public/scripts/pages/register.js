@@ -1,5 +1,5 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
-import { register, registerWithGoogle } from '../common/auth.js';
+import { register, registerWithGoogle, updateUserProfile } from '../common/auth.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const { auth, googleProvider } = await initializeFirebase(); // Now fetched from firebaseConfig.js
@@ -16,15 +16,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             event.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            await register(auth, email, password)
-                .then(() => {
-                    console.log('User registered successfully');
-                    window.location.href = '/mainpage.html';
-                })
-                .catch(error => {
-                    console.error('Registration failed:', error.message);
-                    alert('Registration failed: ' + error.message);
-                });
+            const name = document.getElementById('name').value;
+            const gender = document.getElementById('gender').value;
+            const hobbies = document.getElementById('hobbies').value.split(',').map(hobby => hobby.trim());
+            const aboutYou = document.getElementById('aboutYou').value;
+        
+            try {
+                const userCredential = await register(auth, email, password);
+                await updateUserProfile(userCredential.user, name, gender, hobbies, aboutYou);
+                console.log('User registered and profile updated successfully');
+                window.location.href = '/mainpage.html';
+            } catch (error) {
+                console.error('Registration failed:', error.message);
+                alert('Registration failed: ' + error.message);
+            }
         });
     }
 

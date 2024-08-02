@@ -3,18 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hub</title>
+    <title>Main Page</title>
     <link rel="stylesheet" href="styles/styles.css">
     <script type="module" src="scripts/pages/mainpage.js" defer></script>
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
 </head>
 <body>
     <header class="header">
-        <h1>Hub</h1>
+        <h1>Welcome to the Main Page</h1>
     </header>
     <main class="main-content">
-        <p>Welcome to the  Hub.</p>
+        <section id="userProfile" class="hidden">
+            <h2>Your Profile</h2>
+            <div id="profileData">
+                <p><strong>Name:</strong> <span id="userName"></span></p>
+                <p><strong>Email:</strong> <span id="userEmail"></span></p>
+                <p><strong>Gender:</strong> <span id="userGender"></span></p>
+                <p><strong>Hobbies:</strong> <span id="userHobbies"></span></p>
+                <p><strong>About You:</strong> <span id="userAbout"></span></p>
+            </div>
+            <button id="editProfileButton">Edit Profile</button>
+        </section>
         <button id="logoutButton">Logout</button>
     </main>
 </body>
 </html>
+
