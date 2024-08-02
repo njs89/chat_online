@@ -1,8 +1,8 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
-import { register, registerWithGoogle, updateUserProfile } from '../common/auth.js';
+import { register, registerWithGoogle, updateUserProfile, uploadImages } from '../common/auth.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const { auth, googleProvider } = await initializeFirebase(); // Now fetched from firebaseConfig.js
+    const { auth, googleProvider, storage } = await initializeFirebase();
     const registerForm = document.getElementById('registerForm');
     const googleRegisterButton = document.getElementById('googleRegisterButton');
     const confirmationPopup = document.getElementById('confirmationPopup');
@@ -10,6 +10,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const confirmButton = document.getElementById('confirmButton');
     const cancelButton = document.getElementById('cancelButton');
     let pendingCredential;
+
+    function validateImageFile(file) {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            throw new Error('Invalid file type. Please upload a JPEG, PNG, or GIF image.');
+        }
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            throw new Error('File is too large. Please upload an image smaller than 5MB.');
+        }
+    }
 
     if (registerForm) {
         registerForm.addEventListener('submit', async (event) => {
@@ -20,10 +31,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             const gender = document.getElementById('gender').value;
             const hobbies = document.getElementById('hobbies').value.split(',').map(hobby => hobby.trim());
             const aboutYou = document.getElementById('aboutYou').value;
+            const imageFiles = document.getElementById('profileImages').files;
         
             try {
+                // Validate image files
+                for (let file of imageFiles) {
+                    validateImageFile(file);
+                }
+
                 const userCredential = await register(auth, email, password);
-                await updateUserProfile(userCredential.user, name, gender, hobbies, aboutYou);
+                const imageUrls = await uploadImages(storage, userCredential.user.uid, imageFiles);
+                await updateUserProfile(userCredential.user, name, gender, hobbies, aboutYou, imageUrls);
                 console.log('User registered and profile updated successfully');
                 window.location.href = '/mainpage.html';
             } catch (error) {

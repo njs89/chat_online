@@ -260,3 +260,25 @@ border: 1px solid #ccc;
 box-shadow: 0 0 10px rgba(0,0,0,0.1);
 z-index: 1000;
 }
+
+/* Image display carousel */
+.carousel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.carousel-button {
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+#carouselImage {
+    max-width: 300px;
+    max-height: 300px;
+    object-fit: cover;
+    margin: 0 10px;
+}
