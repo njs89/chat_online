@@ -265,3 +265,45 @@ form button:hover {
 .main-content {
     padding-bottom: 70px; /* Adjust based on the height of your bottom menu */
 }
+
+/* match page */
+
+.profile-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.nav-button, .match-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.match-button {
+    background-color: var(--company-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+.match-button:hover {
+    background-color: var(--company-color-hover);
+}
+
+.chat-window {
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.chat-input {
+    display: flex;
+}
+
+.chat-input input {
+    flex-grow: 1;
+    margin-right: 10px;
+}

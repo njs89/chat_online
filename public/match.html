@@ -12,10 +12,36 @@
         <h1>Find Matches</h1>
     </header>
     <main class="main-content">
-        <div id="matchProfiles">
-            <!-- Profiles will be dynamically added here -->
-        </div>
+        <section id="matchProfile" class="hidden">
+            <div id="imageCarousel" class="carousel">
+                <button id="prevImageButton" class="carousel-button">&lt;</button>
+                <img id="carouselImage" src="" alt="Profile Image">
+                <button id="nextImageButton" class="carousel-button">&gt;</button>
+            </div>
+            <div id="profileData">
+                <h2 id="userName"></h2>
+                <p><strong>Gender:</strong> <span id="userGender"></span></p>
+                <p><strong>Hobbies:</strong> <span id="userHobbies"></span></p>
+                <p><strong>About:</strong> <span id="userAbout"></span></p>
+            </div>
+            <div class="profile-navigation">
+                <button id="prevProfileButton" class="nav-button">&lt;</button>
+                <button id="matchButton" class="match-button">Match</button>
+                <button id="nextProfileButton" class="nav-button">&gt;</button>
+            </div>
+        </section>
     </main>
+    <div id="chatModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Chat</h2>
+            <div id="chatWindow" class="chat-window"></div>
+            <div class="chat-input">
+                <input type="text" id="chatMessage" placeholder="Type your message...">
+                <button id="sendMessage">Send</button>
+            </div>
+        </div>
+    </div>
     <nav class="bottom-menu">
         <a href="mainpage.html" class="menu-item">
             <img src="/icons/profile.svg" alt="Profile" class="menu-icon">
