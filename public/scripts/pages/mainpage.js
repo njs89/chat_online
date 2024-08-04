@@ -1,5 +1,5 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
-import { logout, updateUserProfile, uploadImages, deleteImage } from '../common/auth.js';
+import { updateUserProfile, uploadImages, deleteImage } from '../common/auth.js';
 import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userHobbies = document.getElementById('userHobbies');
     const userAbout = document.getElementById('userAbout');
     const editProfileButton = document.getElementById('editProfileButton');
-    const logoutButton = document.getElementById('logoutButton');
     const imageCarousel = document.getElementById('imageCarousel');
     const carouselImage = document.getElementById('carouselImage');
     const prevButton = document.getElementById('prevButton');
@@ -200,15 +199,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error updating profile:', error);
             alert('An error occurred while updating your profile. Please try again.');
-        }
-    });
-
-    logoutButton.addEventListener('click', async () => {
-        try {
-            await logout(auth);
-            window.location.href = '/index.html';
-        } catch (error) {
-            console.error('Logout failed:', error.message);
         }
     });
 });
