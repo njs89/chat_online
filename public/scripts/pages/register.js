@@ -67,7 +67,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    profileImagesInput.addEventListener('change', (event) => {
+    function initializeCropper() {
+        if (cropper) {
+            cropper.destroy();
+        }
+        cropper = new Cropper(cropperImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            minCropBoxWidth: 200,
+            minCropBoxHeight: 200,
+            maxWidth: 600,
+            maxHeight: 600,
+            responsive: true,
+            restore: false,
+        });
+    }
+    
+    function handleImageSelection(event) {
+        console.log('Image selected'); // Add this line        
+        if (croppedImages.length >= 5) {
+            alert('You can only upload a maximum of 5 images.');
+            event.target.value = '';
+            return;
+        }
+    
         const file = event.target.files[0];
         if (file) {
             try {
@@ -76,15 +99,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 reader.onload = (e) => {
                     cropperImage.src = e.target.result;
                     cropperContainer.style.display = 'block';
-                    if (cropper) {
-                        cropper.destroy();
-                    }
-                    cropper = new Cropper(cropperImage, {
-                        aspectRatio: 1,
-                        viewMode: 1,
-                        minCropBoxWidth: 200,
-                        minCropBoxHeight: 200,
-                    });
+                    cropButton.style.display = 'block'; // Make sure the crop button is visible
+                    initializeCropper();
                 };
                 reader.readAsDataURL(file);
             } catch (error) {
@@ -92,7 +108,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 profileImagesInput.value = '';
             }
         }
-    });
+    }
+
+    profileImagesInput.addEventListener('change', handleImageSelection);
 
     cropButton.addEventListener('click', () => {
         if (cropper) {
@@ -105,12 +123,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 croppedImages.push(croppedFile);
                 updateImagePreview();
                 cropperContainer.style.display = 'none';
-                profileImagesInput.value = '';
+                cropButton.style.display = 'none'; // Hide the crop button after cropping
+                profileImagesInput.value = ''; // Clear the input
                 cropper.destroy();
                 cropper = null;
+                
+                // Re-enable file selection
+                profileImagesInput.disabled = false;
             }, 'image/jpeg');
         }
     });
+
 
     function updateImagePreview() {
         imagePreviewContainer.innerHTML = '';
@@ -135,6 +158,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             container.appendChild(removeButton);
             imagePreviewContainer.appendChild(container);
         });
+        
+        // Disable the file input if max images are reached
+        profileImagesInput.disabled = croppedImages.length >= 5;
     }
 
     if (registerForm) {

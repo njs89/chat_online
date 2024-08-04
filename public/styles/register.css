@@ -84,3 +84,60 @@
         padding: 0 20px;
     }
 }
+
+/* crop images */
+#cropperContainer {
+    max-width: 100%;
+    max-height: 600px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+#cropperImage {
+    max-width: 100%;
+    max-height: 600px;
+}
+
+#cropButton {
+    margin-top: 10px;
+    display: none; /* Initially hidden, will be shown when an image is selected */
+}
+
+#imagePreviewContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+#imagePreviewContainer div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#imagePreviewContainer img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+#imagePreviewContainer button {
+    margin-top: 5px;
+}
+
+#cropButton {
+    display: none; /* Initially hidden */
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: var(--company-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#cropButton:hover {
+    background-color: var(--company-color-hover);
+}
