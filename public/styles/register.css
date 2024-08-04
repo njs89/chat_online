@@ -1,0 +1,76 @@
+.register-form {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.form-step {
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-step.active {
+    display: flex;
+}
+
+.form-step label {
+    font-weight: bold;
+}
+
+.form-step input,
+.form-step select,
+.form-step textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.form-step button {
+    padding: 10px 20px;
+    background-color: var(--company-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.form-step button:hover {
+    background-color: var(--company-color-hover);
+}
+
+.prev-btn,
+.next-btn {
+    align-self: flex-start;
+}
+
+.registration-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.email-option,
+.google-option {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#googleRegisterButton {
+    background-color: #4285F4;
+}
+
+#googleRegisterButton:hover {
+    background-color: #357ae8;
+}
+
+@media (max-width: 768px) {
+    .register-form {
+        padding: 0 20px;
+    }
+}

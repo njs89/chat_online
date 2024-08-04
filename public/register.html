@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
     <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/register.css">
     <script type="module" src="scripts/pages/register.js" defer></script>
 </head>
 <body>
@@ -12,30 +13,64 @@
         <h1>Register</h1>
     </header>
     <main class="main-content">
-        <form id="registerForm">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-            <label for="gender">Gender:</label>
-            <select id="gender" name="gender" required>
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-            </select>
-            <label for="hobbies">Hobbies:</label>
-            <input type="text" id="hobbies" name="hobbies">
-            <label for="aboutYou">About You:</label>
-            <textarea id="aboutYou" name="aboutYou" rows="4"></textarea>
-            <label for="profileImages">Profile Images (Max 5):</label>
-            <input type="file" id="profileImages" name="profileImages" accept="image/*" multiple>
-            <button type="submit">Register</button>
+        <form id="registerForm" class="register-form">
+            <div class="form-step" id="step1">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                <button type="button" class="next-btn">Next</button>
+            </div>
+
+            <div class="form-step" id="step2">
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender" required>
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                </select>
+                <button type="button" class="prev-btn">Previous</button>
+                <button type="button" class="next-btn">Next</button>
+            </div>
+
+            <div class="form-step" id="step3">
+                <label for="hobbies">Hobbies:</label>
+                <input type="text" id="hobbies" name="hobbies">
+                <button type="button" class="prev-btn">Previous</button>
+                <button type="button" class="next-btn">Next</button>
+            </div>
+
+            <div class="form-step" id="step4">
+                <label for="aboutYou">About You:</label>
+                <textarea id="aboutYou" name="aboutYou" rows="4"></textarea>
+                <button type="button" class="prev-btn">Previous</button>
+                <button type="button" class="next-btn">Next</button>
+            </div>
+
+            <div class="form-step" id="step5">
+                <label for="profileImages">Profile Images (Max 5):</label>
+                <input type="file" id="profileImages" name="profileImages" accept="image/*" multiple>
+                <button type="button" class="prev-btn">Previous</button>
+                <button type="button" class="next-btn">Next</button>
+            </div>
+
+            <div class="form-step" id="step6">
+                <h3>Choose Registration Method</h3>
+                <div class="registration-options">
+                    <div class="email-option">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                        <button type="submit" class="register-btn">Register with Email</button>
+                    </div>
+                    <div class="google-option">
+                        <button type="button" id="googleRegisterButton">Register with Google</button>
+                    </div>
+                </div>
+                <button type="button" class="prev-btn">Previous</button>
+            </div>
         </form>
-        <hr>
-        <button id="googleRegisterButton">Register with Google</button>
+
         <div id="confirmationPopup" class="hidden">
             <p id="confirmationMessage"></p>
             <button id="confirmButton">Confirm</button>
