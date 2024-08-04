@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 height: 600
             });
             croppedCanvas.toBlob((blob) => {
-                const croppedFile = new File([blob], "cropped_image.jpg", { type: "image/jpeg" });
+                const croppedFile = new File([blob], `profile_image_${Date.now()}.jpg`, { type: "image/jpeg" });
                 croppedImages.push(croppedFile);
                 updateImagePreview();
                 cropperContainer.style.display = 'none';
@@ -124,7 +124,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const removeButton = document.createElement('button');
             removeButton.textContent = 'Remove';
-            removeButton.onclick = () => {
+            removeButton.onclick = (e) => {
+                e.preventDefault();
                 croppedImages.splice(index, 1);
                 updateImagePreview();
             };
