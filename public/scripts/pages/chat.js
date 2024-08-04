@@ -5,8 +5,10 @@ import { initializeMenu } from '../common/menu.js';
 let db;
 let auth;
 let currentChatPartner = null;
+let currentChatPartnerName = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM content loaded');
     initializeMenu();
     const firebaseInit = await initializeFirebase();
     auth = firebaseInit.auth;
@@ -20,13 +22,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     auth.onAuthStateChanged(async (user) => {
         if (user) {
+            console.log('User authenticated');
             loadMatches();
         } else {
+            console.log('User not authenticated, redirecting');
             window.location.href = '/index.html';
         }
     });
 
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });    
+
     function loadMatches() {
+        console.log('Loading matches');
         const matchesRef = collection(db, 'matches');
         const q = query(matchesRef, where('users', 'array-contains', auth.currentUser.uid));
 
@@ -39,10 +49,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const partnerName = await getUserName(partnerId);
                     const listItem = document.createElement('li');
                     listItem.textContent = partnerName;
-                    listItem.onclick = () => loadChat(partnerId, partnerName);
+                    listItem.dataset.partnerId = partnerId;
+                    listItem.onclick = () => loadChat(partnerId, partnerName, listItem);
                     matchList.appendChild(listItem);
                 }
             }
+            console.log('Matches loaded');
         });
     }
 
@@ -52,10 +64,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         return userDocSnap.exists() ? userDocSnap.data().name : 'Unknown User';
     }
 
-    function loadChat(partnerId, partnerName) {
+
+    function loadChat(partnerId, partnerName, listItem) {
+        console.log('Loading chat for partner:', partnerName);
+        
+        // Remove active class from previously selected match
+        const activeMatch = matchList.querySelector('.active');
+        if (activeMatch) {
+            activeMatch.classList.remove('active');
+        }
+    
+        // Add active class to selected match
+        listItem.classList.add('active');
+    
         currentChatPartner = partnerId;
+        currentChatPartnerName = partnerName;
         chatHeader.textContent = `Chat with ${partnerName}`;
         chatMessages.innerHTML = '<p>Loading messages...</p>';
+        
+        // Enable input and send button
+        messageInput.disabled = false;
+        sendButton.disabled = false;
     
         const messagesRef = collection(db, 'messages');
         const q = query(
@@ -64,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             orderBy('timestamp')
         );
     
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+        onSnapshot(q, (snapshot) => {
             chatMessages.innerHTML = '';
             snapshot.docs.forEach((doc) => {
                 const message = doc.data();
@@ -77,9 +106,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("Error loading chat:", error);
             chatMessages.innerHTML = '<p>Error loading messages. Please try again later.</p>';
         });
-    
-        // Return the unsubscribe function
-        return unsubscribe;
     }
 
     function displayMessage(message) {
@@ -88,7 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isCurrentUser = message.sender === auth.currentUser.uid;
         messageElement.classList.add(isCurrentUser ? 'sent' : 'received');
         
-        const senderName = isCurrentUser ? 'You' : currentChatPartner;
+        const senderName = isCurrentUser ? 'You' : currentChatPartnerName;
         messageElement.innerHTML = `
             <strong>${senderName}:</strong>
             <span>${message.text}</span>
@@ -97,13 +123,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatMessages.appendChild(messageElement);
     }
 
-    sendButton.onclick = sendMessage;
-    messageInput.onkeypress = (e) => {
-        if (e.key === 'Enter') sendMessage();
-    };
-
     async function sendMessage() {
+        console.log('Attempting to send message');
         const messageText = messageInput.value.trim();
+        if (!messageText || !currentChatPartner) {
+            console.log('Cannot send message: ', messageText ? 'No chat partner selected' : 'Empty message');
+            return;
+        }
         if (messageText && currentChatPartner) {
             try {
                 await addDoc(collection(db, 'messages'), {
@@ -113,11 +139,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     users: [auth.currentUser.uid, currentChatPartner],
                     timestamp: new Date()
                 });
+                console.log('Message sent successfully');
                 messageInput.value = '';
             } catch (error) {
                 console.error('Error sending message:', error);
                 alert('Failed to send message. Please try again.');
             }
+        } else {
+            console.log('Cannot send message: ', messageText ? 'No chat partner selected' : 'Empty message');
         }
     }
+
 });
