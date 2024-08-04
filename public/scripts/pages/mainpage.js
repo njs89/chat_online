@@ -54,8 +54,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         event.preventDefault();
         if (cropper) {
             const croppedCanvas = cropper.getCroppedCanvas({
-                width: 300,
-                height: 300
+                width: 600,
+                height: 600
             });
             croppedCanvas.toBlob(async (blob) => {
                 const croppedFile = new File([blob], "cropped_image.jpg", { type: "image/jpeg" });

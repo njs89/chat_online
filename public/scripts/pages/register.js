@@ -17,6 +17,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const prevButtons = document.querySelectorAll('.prev-btn');
     let currentStep = 0;
 
+    // Image cropping
+    const profileImagesInput = document.getElementById('profileImages');
+    const cropperContainer = document.getElementById('cropperContainer');
+    const cropperImage = document.getElementById('cropperImage');
+    const cropButton = document.getElementById('cropButton');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    let cropper;
+    let croppedImages = [];
+
     function showStep(stepIndex) {
         steps.forEach((step, index) => {
             if (index === stepIndex) {
@@ -47,7 +56,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     showStep(currentStep);
 
-    // Existing code for image validation
     function validateImageFile(file) {
         const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
         if (!allowedTypes.includes(file.type)) {
@@ -59,6 +67,75 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    profileImagesInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            try {
+                validateImageFile(file);
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    cropperImage.src = e.target.result;
+                    cropperContainer.style.display = 'block';
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+                    cropper = new Cropper(cropperImage, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        minCropBoxWidth: 200,
+                        minCropBoxHeight: 200,
+                    });
+                };
+                reader.readAsDataURL(file);
+            } catch (error) {
+                alert(error.message);
+                profileImagesInput.value = '';
+            }
+        }
+    });
+
+    cropButton.addEventListener('click', () => {
+        if (cropper) {
+            const croppedCanvas = cropper.getCroppedCanvas({
+                width: 600,
+                height: 600
+            });
+            croppedCanvas.toBlob((blob) => {
+                const croppedFile = new File([blob], "cropped_image.jpg", { type: "image/jpeg" });
+                croppedImages.push(croppedFile);
+                updateImagePreview();
+                cropperContainer.style.display = 'none';
+                profileImagesInput.value = '';
+                cropper.destroy();
+                cropper = null;
+            }, 'image/jpeg');
+        }
+    });
+
+    function updateImagePreview() {
+        imagePreviewContainer.innerHTML = '';
+        croppedImages.forEach((file, index) => {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.style.width = '100px';
+            img.style.height = '100px';
+            img.style.objectFit = 'cover';
+            img.style.margin = '5px';
+
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.onclick = () => {
+                croppedImages.splice(index, 1);
+                updateImagePreview();
+            };
+
+            const container = document.createElement('div');
+            container.appendChild(img);
+            container.appendChild(removeButton);
+            imagePreviewContainer.appendChild(container);
+        });
+    }
+
     if (registerForm) {
         registerForm.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -68,16 +145,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const gender = document.getElementById('gender').value;
             const hobbies = document.getElementById('hobbies').value.split(',').map(hobby => hobby.trim());
             const aboutYou = document.getElementById('aboutYou').value;
-            const imageFiles = document.getElementById('profileImages').files;
         
             try {
-                // Validate image files
-                for (let file of imageFiles) {
-                    validateImageFile(file);
-                }
-
                 const userCredential = await register(auth, email, password);
-                const imageUrls = await uploadImages(storage, userCredential.user.uid, imageFiles);
+                const imageUrls = await uploadImages(storage, userCredential.user.uid, croppedImages);
                 await updateUserProfile(userCredential.user, name, gender, hobbies, aboutYou, imageUrls);
                 console.log('User registered and profile updated successfully');
                 window.location.href = '/mainpage.html';
