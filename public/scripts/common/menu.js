@@ -9,6 +9,10 @@ export function initializeMenu() {
                 <img src="/icons/match.svg" alt="Match" class="menu-icon">
                 <span>Match</span>
             </a>
+            <a href="chat.html" class="menu-item" data-page="chat">
+                <img src="/icons/chat.svg" alt="Chat" class="menu-icon">
+                <span>Chat</span>
+            </a>
             <a href="settings.html" class="menu-item" data-page="settings">
                 <img src="/icons/settings.svg" alt="Settings" class="menu-icon">
                 <span>Settings</span>

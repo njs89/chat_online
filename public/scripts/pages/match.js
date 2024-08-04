@@ -1,10 +1,15 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
-import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { getFirestore, collection, getDocs, query, where, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { initializeMenu } from '../common/menu.js';
+
+let db;
+let auth;
 
 document.addEventListener('DOMContentLoaded', async () => {
     initializeMenu();
-    const { auth, db } = await initializeFirebase();
+    const firebaseInit = await initializeFirebase();
+    auth = firebaseInit.auth;
+    db = firebaseInit.db;
     const matchProfile = document.getElementById('matchProfile');
     const userName = document.getElementById('userName');
     const userGender = document.getElementById('userGender');
@@ -104,7 +109,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     matchButton.addEventListener('click', () => {
-        chatModal.style.display = 'block';
+        const currentProfile = profiles[currentProfileIndex];
+        saveMatch(currentProfile.id);
     });
 
     closeButton.addEventListener('click', () => {
@@ -133,3 +139,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 });
+
+async function saveMatch(partnerId) {
+    if (!db || !auth.currentUser) {
+        console.error('Database or user not initialized');
+        return;
+    }
+
+    try {
+        const matchesRef = collection(db, 'matches');
+        const q = query(
+            matchesRef,
+            where('users', 'in', [[auth.currentUser.uid, partnerId], [partnerId, auth.currentUser.uid]])
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            await addDoc(matchesRef, {
+                users: [auth.currentUser.uid, partnerId],
+                timestamp: new Date()
+            });
+            checkForMutualMatch(partnerId);
+        } else {
+            console.log('Match already exists');
+        }
+    } catch (error) {
+        console.error('Error saving match:', error);
+    }
+}
+
+async function checkForMutualMatch(partnerId) {
+    if (!db || !auth.currentUser) {
+        console.error('Database or user not initialized');
+        return;
+    }
+
+    const matchesRef = collection(db, 'matches');
+    const q = query(
+        matchesRef,
+        where('users', '==', [partnerId, auth.currentUser.uid])
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+        alert('You have a new match!');
+        // You can add more functionality here, like updating the UI or sending a notification
+    }
+}
