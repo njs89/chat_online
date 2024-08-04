@@ -1,7 +1,9 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
 import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { initializeMenu } from '../common/menu.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    initializeMenu();
     const { auth, db } = await initializeFirebase();
     const matchProfile = document.getElementById('matchProfile');
     const userName = document.getElementById('userName');

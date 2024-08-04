@@ -1,7 +1,9 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
 import { logout } from '../common/auth.js';
+import { initializeMenu } from '../common/menu.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    initializeMenu();
     const { auth } = await initializeFirebase();
     const logoutButton = document.getElementById('logoutButton');
 

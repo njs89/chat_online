@@ -2,8 +2,10 @@ import { initializeFirebase } from '../common/firebaseConfig.js';
 import { updateUserProfile, uploadImages, deleteImage } from '../common/auth.js';
 import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { getDownloadURL, ref, deleteObject } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
+import { initializeMenu } from '../common/menu.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    initializeMenu();
     const { auth, db, storage } = await initializeFirebase();
     const userProfile = document.getElementById('userProfile');
     const userName = document.getElementById('userName');
