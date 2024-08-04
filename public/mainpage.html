@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <link rel="stylesheet" href="styles/main_styles.css">
     <script type="module" src="scripts/pages/mainpage.js" defer></script>
 </head>
@@ -12,7 +14,6 @@
         <h1>Your Profile</h1>
     </header>
     <main class="main-content">
-        <!-- ... existing content ... -->
     </main>
     <nav class="bottom-menu">
         <a href="mainpage.html" class="menu-item active">
@@ -52,22 +53,35 @@
                 <form id="editProfileForm">
                     <label for="editName">Name:</label>
                     <input type="text" id="editName" name="editName" required>
+                    
                     <label for="editGender">Gender:</label>
                     <select id="editGender" name="editGender" required>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
                         <option value="other">Other</option>
                     </select>
+                    
                     <label for="editHobbies">Hobbies:</label>
                     <input type="text" id="editHobbies" name="editHobbies">
+                    
                     <label for="editAboutYou">About You:</label>
                     <textarea id="editAboutYou" name="editAboutYou" rows="4"></textarea>
-                    <div id="currentImages"></div>                    
-                    <label for="editProfileImages">Add New Images (Max 5 total):</label>
-                    <input type="file" id="editProfileImages" name="editProfileImages" accept="image/*" multiple>                    
+                    
+                    <h3>Profile Images</h3>
+                    <div id="currentImages"></div>
+                    
+                    <label for="editProfileImages">Add New Image:</label>
+                    <input type="file" id="editProfileImages" name="editProfileImages" accept="image/*">
+                    
+                    <div id="cropperContainer" style="display: none;">
+                        <img id="cropperImage" src="">
+                        <button id="cropButton">Crop and Upload</button>
+                    </div>
+                    
                     <button type="submit">Save Changes</button>
                 </form>
             </div>
+        </div>
         </div>
     </main>
 </body>

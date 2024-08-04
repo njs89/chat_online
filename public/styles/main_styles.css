@@ -307,3 +307,28 @@ form button:hover {
     flex-grow: 1;
     margin-right: 10px;
 }
+
+/* image cropping */
+
+#cropperContainer {
+    margin-top: 20px;
+}
+
+#cropperImage {
+    max-width: 100%;
+    display: block;
+}
+
+#cropButton {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: var(--company-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#cropButton:hover {
+    background-color: var(--company-color-hover);
+}

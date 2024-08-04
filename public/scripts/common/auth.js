@@ -3,6 +3,7 @@ import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.
 import { deleteObject, getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
 
 
+
 export function register(auth, email, password) {
     return createUserWithEmailAndPassword(auth, email, password)
         .catch(error => {
@@ -53,8 +54,10 @@ export async function uploadImages(storage, userId, imageFiles) {
     for (let i = 0; i < Math.min(imageFiles.length, 5); i++) {
         const file = imageFiles[i];
         try {
-            const storageRef = ref(storage, `user_images/${userId}/${file.name}`);
-            await uploadBytes(storageRef, file);
+            // Resize image if it's smaller than 300x300
+            const resizedFile = await resizeImageIfNeeded(file, 300, 300);
+            const storageRef = ref(storage, `user_images/${userId}/${resizedFile.name}`);
+            await uploadBytes(storageRef, resizedFile);
             const url = await getDownloadURL(storageRef);
             imageUrls.push(url);
         } catch (error) {
@@ -63,6 +66,27 @@ export async function uploadImages(storage, userId, imageFiles) {
         }
     }
     return imageUrls;
+}
+
+async function resizeImageIfNeeded(file, targetWidth, targetHeight) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            if (img.width >= targetWidth && img.height >= targetHeight) {
+                resolve(file);
+            } else {
+                const canvas = document.createElement('canvas');
+                canvas.width = targetWidth;
+                canvas.height = targetHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+                canvas.toBlob((blob) => {
+                    resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+                }, 'image/jpeg');
+            }
+        };
+        img.src = URL.createObjectURL(file);
+    });
 }
 
 export async function deleteImage(storage, userId, imageUrl) {

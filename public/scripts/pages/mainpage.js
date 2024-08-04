@@ -22,6 +22,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     const editProfileForm = document.getElementById('editProfileForm');
     const closeButton = document.querySelector('.close-button');
     const currentImages = document.getElementById('currentImages');
+    const editProfileImages = document.getElementById('editProfileImages');
+    const cropperContainer = document.getElementById('cropperContainer');
+    const cropperImage = document.getElementById('cropperImage');
+    const cropButton = document.getElementById('cropButton');
+
+    let cropper;
+
+    editProfileImages.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                cropperImage.src = e.target.result;
+                cropperContainer.style.display = 'block';
+                if (cropper) {
+                    cropper.destroy();
+                }
+                cropper = new Cropper(cropperImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    minCropBoxWidth: 200,
+                    minCropBoxHeight: 200,
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    cropButton.addEventListener('click', async (event) => {
+        event.preventDefault();
+        if (cropper) {
+            const croppedCanvas = cropper.getCroppedCanvas({
+                width: 300,
+                height: 300
+            });
+            croppedCanvas.toBlob(async (blob) => {
+                const croppedFile = new File([blob], "cropped_image.jpg", { type: "image/jpeg" });
+                try {
+                    const newImageUrls = await uploadImages(storage, currentUser.uid, [croppedFile]);
+                    userImages = [...userImages, ...newImageUrls].slice(0, 5);
+                    updateProfileDisplay({ profileImages: userImages });
+                    populateEditForm(); // Refresh the current images display
+                    cropperContainer.style.display = 'none';
+                    cropper.destroy();
+                    cropper = null;
+                    editProfileImages.value = ''; // Clear the file input
+                } catch (error) {
+                    console.error('Error uploading cropped image:', error);
+                    alert('An error occurred while uploading the cropped image. Please try again.');
+                }
+            }, 'image/jpeg');
+        }
+    });
 
     let currentUser;
 
@@ -186,14 +239,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const gender = document.getElementById('editGender').value;
         const hobbies = document.getElementById('editHobbies').value.split(',').map(hobby => hobby.trim());
         const aboutYou = document.getElementById('editAboutYou').value;
-        const newImageFiles = document.getElementById('editProfileImages').files;
-    
+
         try {
-            const newImageUrls = await uploadImages(storage, currentUser.uid, newImageFiles);
-            const updatedImageUrls = [...userImages, ...newImageUrls].slice(0, 5);
-            await updateUserProfile(currentUser, name, gender, hobbies, aboutYou, updatedImageUrls);
-            
-            updateProfileDisplay({ name, gender, hobbies, aboutYou, profileImages: updatedImageUrls });
+            await updateUserProfile(currentUser, name, gender, hobbies, aboutYou, userImages);
+            updateProfileDisplay({ name, gender, hobbies, aboutYou, profileImages: userImages });
             editProfileModal.style.display = 'none';
             alert('Profile updated successfully!');
         } catch (error) {
