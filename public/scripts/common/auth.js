@@ -54,19 +54,25 @@ export async function uploadImages(storage, userId, imageFiles) {
     for (let i = 0; i < Math.min(imageFiles.length, 5); i++) {
         const file = imageFiles[i];
         try {
-            // Resize image if it's smaller than 300x300
-            const resizedFile = await resizeImageIfNeeded(file, 300, 300);
+            const resizedFile = await resizeImageIfNeeded(file, 600, 600);
             const storageRef = ref(storage, `user_images/${userId}/${resizedFile.name}`);
             await uploadBytes(storageRef, resizedFile);
             const url = await getDownloadURL(storageRef);
             imageUrls.push(url);
         } catch (error) {
             console.error('Error uploading image:', error);
-            // Continue with the next image
+            if (error.code === 'storage/canceled') {
+                alert('Image upload was canceled. Please try again.');
+            } else {
+                alert('Failed to upload image. Please check your internet connection and try again.');
+            }
+            // Don't continue with the next image if there's an error
+            break;
         }
     }
     return imageUrls;
 }
+
 
 async function resizeImageIfNeeded(file, targetWidth, targetHeight) {
     return new Promise((resolve) => {

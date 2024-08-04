@@ -1,6 +1,7 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
 import { updateUserProfile, uploadImages, deleteImage } from '../common/auth.js';
 import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { getDownloadURL, ref, deleteObject } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const { auth, db, storage } = await initializeFirebase();
@@ -29,6 +30,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let cropper;
 
+        // Enable/disable fields when "Change" button is clicked
+    document.querySelectorAll('.change-button').forEach(button => {
+        button.addEventListener('click', (event) => {
+            const fieldId = event.target.dataset.field;
+            const field = document.getElementById(fieldId);
+            field.disabled = !field.disabled;
+            event.target.textContent = field.disabled ? 'Change' : 'Cancel';
+        });
+    });
+
+    // Prevent modal from closing when clicking outside
+    editProfileModal.addEventListener('click', (event) => {
+        if (event.target === editProfileModal) {
+            event.stopPropagation();
+        }
+    });
+
+    // Close modal only when close button is clicked
+    closeButton.addEventListener('click', () => {
+        editProfileModal.style.display = 'none';
+    });
+
     editProfileImages.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -50,6 +73,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    
+
     cropButton.addEventListener('click', async (event) => {
         event.preventDefault();
         if (cropper) {
@@ -58,12 +83,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 height: 600
             });
             croppedCanvas.toBlob(async (blob) => {
-                const croppedFile = new File([blob], "cropped_image.jpg", { type: "image/jpeg" });
+                const croppedFile = new File([blob], `profile_image_${Date.now()}.jpg`, { type: "image/jpeg" });
                 try {
                     const newImageUrls = await uploadImages(storage, currentUser.uid, [croppedFile]);
-                    userImages = [...userImages, ...newImageUrls].slice(0, 5);
-                    updateProfileDisplay({ profileImages: userImages });
-                    populateEditForm(); // Refresh the current images display
+                    if (newImageUrls.length > 0) {
+                        userImages = [...userImages, ...newImageUrls].slice(0, 5);
+                        await updateFirestoreImages();
+                        updateProfileImagesDisplay(userImages);
+                    }
                     cropperContainer.style.display = 'none';
                     cropper.destroy();
                     cropper = null;
@@ -108,32 +135,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         userHobbies.textContent = userData.hobbies ? userData.hobbies.join(', ') : 'Not set';
         userAbout.textContent = userData.aboutYou || 'Not set';
         
-        userImages = (userData.profileImages || []).filter(url => url);
-        if (userImages.length > 0) {
-            imageCarousel.style.display = 'flex';
-            currentImageIndex = 0;
-            updateCarouselImage();
-        } else {
-            imageCarousel.style.display = 'none';
-            carouselImage.src = PLACEHOLDER_IMAGE_PATH;
-        }
+        updateProfileImagesDisplay(userData.profileImages || []);
     }
 
-    function updateCarouselImage() {
+    async function updateCarouselImage() {
         if (userImages.length > 0) {
-            carouselImage.src = userImages[currentImageIndex];
-            carouselImage.onerror = function() {
-                console.error('Failed to load image:', userImages[currentImageIndex]);
+            const imageUrl = userImages[currentImageIndex];
+            try {
+                // Try to get a fresh download URL
+                const storageRef = ref(storage, imageUrl);
+                const freshUrl = await getDownloadURL(storageRef);
+                carouselImage.src = freshUrl;
+                userImages[currentImageIndex] = freshUrl; // Update the URL in the array
+            } catch (error) {
+                console.error('Error loading image:', error);
+                // Remove the invalid image URL
                 userImages = userImages.filter((_, i) => i !== currentImageIndex);
                 if (userImages.length > 0) {
                     currentImageIndex = currentImageIndex % userImages.length;
-                    updateCarouselImage();
-                    updateFirestoreImages();
+                    await updateCarouselImage();
                 } else {
                     imageCarousel.style.display = 'none';
                     carouselImage.src = PLACEHOLDER_IMAGE_PATH;
                 }
-            };
+                // Update Firestore with the new userImages array
+                await updateFirestoreImages();
+            }
         } else {
             imageCarousel.style.display = 'none';
             carouselImage.src = PLACEHOLDER_IMAGE_PATH;
@@ -147,9 +174,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('Firestore updated with current images');
         } catch (error) {
             console.error('Error updating Firestore:', error);
+            throw error; // Rethrow the error to be caught by the calling function
         }
     }
-
     prevButton.addEventListener('click', () => {
         currentImageIndex = (currentImageIndex - 1 + userImages.length) % userImages.length;
         updateCarouselImage();
@@ -177,23 +204,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function populateEditForm() {
         try {
-            document.getElementById('editName').value = userName.textContent;
-            document.getElementById('editGender').value = userGender.textContent;
-            document.getElementById('editHobbies').value = userHobbies.textContent;
-            document.getElementById('editAboutYou').value = userAbout.textContent;
+            document.getElementById('editName').value = userName.textContent !== 'Not set' ? userName.textContent : '';
+            document.getElementById('editGender').value = userGender.textContent !== 'Not set' ? userGender.textContent : '';
+            document.getElementById('editHobbies').value = userHobbies.textContent !== 'Not set' ? userHobbies.textContent : '';
+            document.getElementById('editAboutYou').value = userAbout.textContent !== 'Not set' ? userAbout.textContent : '';
     
-            currentImages.innerHTML = '';
-            userImages.forEach((imageUrl, index) => {
+            // Reset all fields to disabled state
+            document.querySelectorAll('.edit-field input, .edit-field select, .edit-field textarea').forEach(field => {
+                field.disabled = true;
+            });
+            document.querySelectorAll('.change-button').forEach(button => {
+                button.textContent = 'Change';
+            });
+    
+            populateEditFormImages();
+        } catch (error) {
+            console.error('Error populating edit form:', error);
+            alert('An error occurred while loading your profile data. Please try again.');
+        }
+    }
+
+
+    async function populateEditFormImages() {
+        currentImages.innerHTML = '';
+        const validImages = [];
+        for (const [index, imageUrl] of userImages.entries()) {
+            try {
+                const storageRef = ref(storage, imageUrl);
+                const freshUrl = await getDownloadURL(storageRef);
+                validImages.push(freshUrl);
+                
                 const imageContainer = document.createElement('div');
                 imageContainer.className = 'image-container';
                 
                 const img = document.createElement('img');
-                img.src = imageUrl;
+                img.src = freshUrl;
                 img.alt = `Profile image ${index + 1}`;
-                img.onerror = function() {
-                    console.error('Failed to load image:', imageUrl);
-                    this.src = PLACEHOLDER_IMAGE_PATH;
-                };
                 
                 const deleteButton = document.createElement('button');
                 deleteButton.className = 'delete-image';
@@ -201,44 +247,78 @@ document.addEventListener('DOMContentLoaded', async () => {
                 deleteButton.addEventListener('click', async (event) => {
                     event.preventDefault();
                     event.stopPropagation();
-                    await deleteProfileImage(index);
-                    populateEditForm();
+                    await deleteProfileImage(validImages.indexOf(freshUrl));
                 });
                 
                 imageContainer.appendChild(img);
                 imageContainer.appendChild(deleteButton);
                 currentImages.appendChild(imageContainer);
-            });
-        } catch (error) {
-            console.error('Error populating edit form:', error);
-            alert('An error occurred while loading your profile data. Please try again.');
+            } catch (error) {
+                console.error('Error loading image:', error);
+                // Skip this image as it's invalid
+            }
         }
-    }    
+        
+        // Update userImages with only valid images
+        if (userImages.length !== validImages.length) {
+            userImages = validImages;
+            await updateFirestoreImages();
+        }
+    }
+
 
     async function deleteProfileImage(index) {
         try {
             const imageUrl = userImages[index];
-            await deleteImage(storage, currentUser.uid, imageUrl);
+            const storageRef = ref(storage, imageUrl);
+            
+            // Attempt to delete the image from storage
+            try {
+                await deleteObject(storageRef);
+                console.log('Image deleted from storage');
+            } catch (storageError) {
+                if (storageError.code !== 'storage/object-not-found') {
+                    throw storageError; // Rethrow if it's not a 'not found' error
+                }
+                console.log('Image not found in storage, proceeding with removal from profile');
+            }
+    
+            // Remove the image URL from the userImages array
             userImages = userImages.filter((_, i) => i !== index);
             
-            // Update Firestore document
-            const userDocRef = doc(db, "users", currentUser.uid);
-            await updateDoc(userDocRef, { profileImages: userImages });
+            // Update Firestore document with the updated images
+            await updateFirestoreImages();
             
-            updateProfileDisplay({ profileImages: userImages });
+            // Update the profile display
+            await updateProfileImagesDisplay(userImages);
             console.log('Image deleted and profile updated');
         } catch (error) {
-            console.error('Error deleting image:', error);
-            alert('Failed to delete image. Please try again.');
+            console.error('Error in deleteProfileImage:', error);
+            alert('An error occurred while deleting the image. Please try again.');
         }
+    }
+
+    async function updateProfileImagesDisplay(images) {
+        userImages = images.filter(url => url);
+        if (userImages.length > 0) {
+            imageCarousel.style.display = 'flex';
+            currentImageIndex = 0;
+            await updateCarouselImage();
+        } else {
+            imageCarousel.style.display = 'none';
+            carouselImage.src = PLACEHOLDER_IMAGE_PATH;
+        }
+        
+        // Update the edit form images display
+        await populateEditFormImages();
     }
 
     editProfileForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const name = document.getElementById('editName').value;
-        const gender = document.getElementById('editGender').value;
-        const hobbies = document.getElementById('editHobbies').value.split(',').map(hobby => hobby.trim());
-        const aboutYou = document.getElementById('editAboutYou').value;
+        const name = document.getElementById('editName').value || userName.textContent;
+        const gender = document.getElementById('editGender').value || userGender.textContent;
+        const hobbies = document.getElementById('editHobbies').value ? document.getElementById('editHobbies').value.split(',').map(hobby => hobby.trim()) : userHobbies.textContent.split(',').map(hobby => hobby.trim());
+        const aboutYou = document.getElementById('editAboutYou').value || userAbout.textContent;
 
         try {
             await updateUserProfile(currentUser, name, gender, hobbies, aboutYou, userImages);

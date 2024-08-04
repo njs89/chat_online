@@ -46,26 +46,39 @@
             </div>
             <button id="editProfileButton">Edit Profile</button>
         </section>
+
         <div id="editProfileModal" class="modal">
             <div class="modal-content">
                 <span class="close-button">&times;</span>
                 <h2>Edit Profile</h2>
                 <form id="editProfileForm">
-                    <label for="editName">Name:</label>
-                    <input type="text" id="editName" name="editName" required>
+                    <div class="edit-field">
+                        <label for="editName">Name:</label>
+                        <input type="text" id="editName" name="editName" required disabled>
+                        <button type="button" class="change-button" data-field="editName">Change</button>
+                    </div>
                     
-                    <label for="editGender">Gender:</label>
-                    <select id="editGender" name="editGender" required>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                    </select>
+                    <div class="edit-field">
+                        <label for="editGender">Gender:</label>
+                        <select id="editGender" name="editGender" required disabled>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <button type="button" class="change-button" data-field="editGender">Change</button>
+                    </div>
                     
-                    <label for="editHobbies">Hobbies:</label>
-                    <input type="text" id="editHobbies" name="editHobbies">
+                    <div class="edit-field">
+                        <label for="editHobbies">Hobbies:</label>
+                        <input type="text" id="editHobbies" name="editHobbies" disabled>
+                        <button type="button" class="change-button" data-field="editHobbies">Change</button>
+                    </div>
                     
-                    <label for="editAboutYou">About You:</label>
-                    <textarea id="editAboutYou" name="editAboutYou" rows="4"></textarea>
+                    <div class="edit-field">
+                        <label for="editAboutYou">About You:</label>
+                        <textarea id="editAboutYou" name="editAboutYou" rows="4" disabled></textarea>
+                        <button type="button" class="change-button" data-field="editAboutYou">Change</button>
+                    </div>
                     
                     <h3>Profile Images</h3>
                     <div id="currentImages"></div>
@@ -81,7 +94,7 @@
                     <button type="submit">Save Changes</button>
                 </form>
             </div>
-        </div>
+        </div>       
         </div>
     </main>
 </body>
