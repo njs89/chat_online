@@ -43,10 +43,20 @@
     background-color: var(--company-color-hover);
 }
 
-.prev-btn,
-.next-btn {
-    align-self: flex-start;
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
 }
+
+.button-group button {
+    flex: 0 0 48%; /* This makes each button take up 48% of the container width */
+}
+/* If you want to change the order of the buttons */
+/*.button-group {
+    flex-direction: row-reverse;
+}*/
+
 
 .registration-options {
     display: flex;
