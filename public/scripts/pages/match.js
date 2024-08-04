@@ -1,5 +1,5 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
-import { getFirestore, collection, getDocs, query, where, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { getFirestore, collection, getDocs, query, where, addDoc, updateDoc, deleteDoc, doc, arrayUnion } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { initializeMenu } from '../common/menu.js';
 
 let db;
@@ -37,18 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             try {
-                const usersSnapshot = await getDocs(collection(db, "users"));
-                profiles = usersSnapshot.docs
-                    .map(doc => ({ id: doc.id, ...doc.data() }))
-                    .filter(profile => profile.id !== user.uid);
-                
-                if (profiles.length > 0) {
-                    matchProfile.classList.remove('hidden');
-                    updateProfileDisplay(profiles[currentProfileIndex]);
-                } else {
-                    matchProfile.classList.add('hidden');
-                    alert('No matching profiles found.');
-                }
+                await loadProfiles();
             } catch (error) {
                 console.error("Error fetching user profiles:", error);
             }
@@ -57,7 +46,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    function updateProfileDisplay(profile) {
+    async function loadProfiles() {
+        const usersSnapshot = await getDocs(collection(db, "users"));
+        profiles = usersSnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(profile => profile.id !== auth.currentUser.uid);
+        
+        if (profiles.length > 0) {
+            matchProfile.classList.remove('hidden');
+            await updateProfileDisplay(profiles[currentProfileIndex]);
+        } else {
+            matchProfile.classList.add('hidden');
+            alert('No matching profiles found.');
+        }
+    }
+
+    async function updateProfileDisplay(profile) {
         userName.textContent = profile.name || 'Not set';
         userGender.textContent = profile.gender || 'Not set';
         userHobbies.textContent = profile.hobbies ? profile.hobbies.join(', ') : 'Not set';
@@ -72,6 +76,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             imageCarousel.style.display = 'none';
             carouselImage.src = PLACEHOLDER_IMAGE_PATH;
         }
+        const isMatched = await checkIfMatched(profile.id);
+        updateMatchButton(isMatched);
+    }       
+
+    function updateMatchButton(isMatched) {
+        matchButton.textContent = isMatched ? 'Unmatch' : 'Match';
+        matchButton.onclick = () => handleMatchAction(profiles[currentProfileIndex].id, isMatched);
+    }
+
+    async function handleMatchAction(partnerId, isMatched) {
+        if (isMatched) {
+            await unmatch(partnerId);
+        } else {
+            await saveMatch(partnerId);
+        }
+        await updateProfileDisplay(profiles[currentProfileIndex]);
     }
 
     function updateCarouselImage(images) {
@@ -140,6 +160,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
+async function checkIfMatched(partnerId) {
+    const matchesRef = collection(db, 'matches');
+    const q = query(
+        matchesRef,
+        where('userId', '==', auth.currentUser.uid),
+        where('partnerId', '==', partnerId)
+    );
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
+}
+
 async function saveMatch(partnerId) {
     if (!db || !auth.currentUser) {
         console.error('Database or user not initialized');
@@ -148,20 +179,43 @@ async function saveMatch(partnerId) {
 
     try {
         const matchesRef = collection(db, 'matches');
-        const q = query(
+        
+        // Check if a match already exists
+        const matchQuery = query(
             matchesRef,
-            where('users', 'in', [[auth.currentUser.uid, partnerId], [partnerId, auth.currentUser.uid]])
+            where('users', 'array-contains', auth.currentUser.uid)
         );
-        const querySnapshot = await getDocs(q);
+        const matchSnapshot = await getDocs(matchQuery);
 
-        if (querySnapshot.empty) {
+        let matchDoc = matchSnapshot.docs.find(doc => 
+            doc.data().users.includes(partnerId)
+        );
+
+        if (matchDoc) {
+            // Match document already exists
+            const matchData = matchDoc.data();
+            if (!matchData.matchedBy.includes(auth.currentUser.uid)) {
+                // Current user hasn't matched yet, so update the document
+                await updateDoc(doc(db, 'matches', matchDoc.id), {
+                    matchedBy: arrayUnion(auth.currentUser.uid)
+                });
+                
+                if (matchData.matchedBy.includes(partnerId)) {
+                    alert('You have a new match!');
+                } else {
+                    alert('Match request sent!');
+                }
+            } else {
+                alert('You already matched with this user!');
+            }
+        } else {
+            // No match document exists, so create a new one
             await addDoc(matchesRef, {
                 users: [auth.currentUser.uid, partnerId],
+                matchedBy: [auth.currentUser.uid],
                 timestamp: new Date()
             });
-            checkForMutualMatch(partnerId);
-        } else {
-            console.log('Match already exists');
+            alert('Match request sent!');
         }
     } catch (error) {
         console.error('Error saving match:', error);
@@ -171,18 +225,72 @@ async function saveMatch(partnerId) {
 async function checkForMutualMatch(partnerId) {
     if (!db || !auth.currentUser) {
         console.error('Database or user not initialized');
-        return;
+        return false;
     }
 
     const matchesRef = collection(db, 'matches');
     const q = query(
         matchesRef,
-        where('users', '==', [partnerId, auth.currentUser.uid])
+        where('users', 'array-contains', auth.currentUser.uid),
+        where('users', 'array-contains', partnerId)
     );
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
-        alert('You have a new match!');
-        // You can add more functionality here, like updating the UI or sending a notification
+        const matchDoc = querySnapshot.docs[0];
+        const matchData = matchDoc.data();
+        return matchData.matchedBy.includes(auth.currentUser.uid) && matchData.matchedBy.includes(partnerId);
     }
+
+    return false;
+}
+
+async function unmatch(partnerId) {
+    if (!db || !auth.currentUser) {
+        console.error('Database or user not initialized');
+        return;
+    }
+
+    try {
+        const matchesRef = collection(db, 'matches');
+        const q = query(
+            matchesRef,
+            where('users', 'array-contains', auth.currentUser.uid)
+        );
+        const querySnapshot = await getDocs(q);
+
+        const matchToDelete = querySnapshot.docs.find(doc => doc.data().users.includes(partnerId));
+        if (matchToDelete) {
+            await deleteDoc(doc(db, 'matches', matchToDelete.id));
+            console.log('Unmatched successfully');
+        }
+    } catch (error) {
+        console.error('Error unmatching:', error);
+    }
+}
+
+async function cleanupDuplicateMatches() {
+    const matchesRef = collection(db, 'matches');
+    const matchesSnapshot = await getDocs(matchesRef);
+    
+    const matchMap = new Map();
+    
+    matchesSnapshot.forEach(doc => {
+        const data = doc.data();
+        const key = data.users.sort().join('_');
+        if (!matchMap.has(key) || doc.data().timestamp > matchMap.get(key).data().timestamp) {
+            matchMap.set(key, doc);
+        }
+    });
+    
+    const batch = writeBatch(db);
+    matchesSnapshot.forEach(doc => {
+        const key = doc.data().users.sort().join('_');
+        if (matchMap.get(key).id !== doc.id) {
+            batch.delete(doc.ref);
+        }
+    });
+    
+    await batch.commit();
+    console.log('Duplicate matches cleaned up');
 }

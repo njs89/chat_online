@@ -1,22 +1,25 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
+import { getFirestore, collection, query, where, onSnapshot, addDoc, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { initializeMenu } from '../common/menu.js';
-import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, doc, deleteDoc, orderBy } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+
+let db;
+let auth;
+let currentChatPartner = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     initializeMenu();
-    const { auth, db } = await initializeFirebase();
+    const firebaseInit = await initializeFirebase();
+    auth = firebaseInit.auth;
+    db = firebaseInit.db;
+
     const matchList = document.getElementById('matchList');
-    const chatHeader = document.getElementById('chatHeader');
     const chatMessages = document.getElementById('chatMessages');
     const messageInput = document.getElementById('messageInput');
     const sendButton = document.getElementById('sendButton');
-
-    let currentUser;
-    let currentChatPartner;
+    const chatHeader = document.getElementById('chatHeader');
 
     auth.onAuthStateChanged(async (user) => {
         if (user) {
-            currentUser = user;
             loadMatches();
         } else {
             window.location.href = '/index.html';
@@ -25,39 +28,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function loadMatches() {
         const matchesRef = collection(db, 'matches');
-        const q = query(matchesRef, where('users', 'array-contains', currentUser.uid));
+        const q = query(matchesRef, where('users', 'array-contains', auth.currentUser.uid));
 
-        onSnapshot(q, (snapshot) => {
+        onSnapshot(q, async (snapshot) => {
             matchList.innerHTML = '';
-            snapshot.forEach((doc) => {
+            for (const doc of snapshot.docs) {
                 const match = doc.data();
-                const partnerId = match.users.find(id => id !== currentUser.uid);
-                const listItem = document.createElement('li');
-                listItem.textContent = partnerId; // Replace with actual user name when available
-                listItem.addEventListener('click', () => loadChat(partnerId));
-
-                const unmatchButton = document.createElement('button');
-                unmatchButton.textContent = 'Unmatch';
-                unmatchButton.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    unmatch(doc.id);
-                });
-
-                listItem.appendChild(unmatchButton);
-                matchList.appendChild(listItem);
-            });
+                if (match.matchedBy.includes(auth.currentUser.uid) && match.matchedBy.length > 1) {
+                    const partnerId = match.users.find(id => id !== auth.currentUser.uid);
+                    const partnerName = await getUserName(partnerId);
+                    const listItem = document.createElement('li');
+                    listItem.textContent = partnerName;
+                    listItem.onclick = () => loadChat(partnerId, partnerName);
+                    matchList.appendChild(listItem);
+                }
+            }
         });
     }
 
-    function loadChat(partnerId) {
+    async function getUserName(userId) {
+        const userDoc = await getDocs(doc(db, 'users', userId));
+        return userDoc.exists() ? userDoc.data().name : 'Unknown User';
+    }
+
+    function loadChat(partnerId, partnerName) {
         currentChatPartner = partnerId;
-        chatHeader.textContent = `Chat with ${partnerId}`; // Replace with actual user name when available
+        chatHeader.textContent = `Chat with ${partnerName}`;
         chatMessages.innerHTML = '';
 
         const messagesRef = collection(db, 'messages');
         const q = query(
             messagesRef,
-            where('users', 'in', [[currentUser.uid, partnerId], [partnerId, currentUser.uid]]),
+            where('users', 'in', [[auth.currentUser.uid, partnerId], [partnerId, auth.currentUser.uid]]),
             orderBy('timestamp')
         );
 
@@ -74,18 +76,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     function displayMessage(message) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
-        messageElement.classList.add(message.sender === currentUser.uid ? 'sent' : 'received');
+        messageElement.classList.add(message.sender === auth.currentUser.uid ? 'sent' : 'received');
         messageElement.textContent = message.text;
         chatMessages.appendChild(messageElement);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    sendButton.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
+    sendButton.onclick = sendMessage;
+    messageInput.onkeypress = (e) => {
+        if (e.key === 'Enter') sendMessage();
+    };
 
     async function sendMessage() {
         const messageText = messageInput.value.trim();
@@ -93,24 +93,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 await addDoc(collection(db, 'messages'), {
                     text: messageText,
-                    sender: currentUser.uid,
+                    sender: auth.currentUser.uid,
                     recipient: currentChatPartner,
-                    users: [currentUser.uid, currentChatPartner],
+                    users: [auth.currentUser.uid, currentChatPartner],
                     timestamp: new Date()
                 });
                 messageInput.value = '';
             } catch (error) {
                 console.error('Error sending message:', error);
             }
-        }
-    }
-
-    async function unmatch(matchId) {
-        try {
-            await deleteDoc(doc(db, 'matches', matchId));
-            // You might want to delete or archive the chat messages here as well
-        } catch (error) {
-            console.error('Error unmatching:', error);
         }
     }
 });
