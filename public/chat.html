@@ -6,6 +6,7 @@
     <title>Chat</title>
     <link rel="stylesheet" href="styles/main_styles.css">
     <link rel="stylesheet" href="styles/menu.css">
+    <link rel="stylesheet" href="styles/chat.css">
     <script type="module" src="scripts/pages/chat.js" defer></script>
 </head>
 <body>
@@ -15,15 +16,15 @@
     <main class="main-content">
         <div class="chat-container">
             <div class="match-list">
-                <h2>Your Matches</h2>
+                <h2>Matches</h2>
                 <ul id="matchList"></ul>
             </div>
             <div class="chat-window">
-                <div id="chatHeader"></div>
+                <h2 id="chatHeader">Select a match to start chatting</h2>
                 <div id="chatMessages"></div>
                 <div class="chat-input">
-                    <input type="text" id="messageInput" placeholder="Type your message...">
-                    <button id="sendButton">Send</button>
+                    <input type="text" id="messageInput" placeholder="Type your message..." disabled>
+                    <button id="sendButton" disabled>Send</button>
                 </div>
             </div>
         </div>
