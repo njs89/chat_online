@@ -1,16 +1,68 @@
 .chat-container {
     display: flex;
-    height: 80vh;
+    height: 85vh;
     border: 1px solid #ccc;
     border-radius: 5px;
     overflow: hidden;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .match-list {
-    width: 20%;
+    width: 30%; /* Increased from 20% */
     border-right: 1px solid #ccc;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
+
+#matchList li {
+    padding: 15px; /* Increased padding */
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-bottom: 1px solid #eee; /* Added border for separation */
+}
+
+.chat-window {
+    width: 70%; /* Adjusted to complement the match-list width */
+    display: flex;
+    flex-direction: column;
+}
+
+#chatMessages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px; /* Increased padding */
+}
+
+.message {
+    margin-bottom: 15px; /* Increased margin */
+    padding: 10px 15px; /* Increased padding */
+    border-radius: 8px; /* Slightly rounded corners */
+    max-width: 80%; /* Increased max-width */
+    line-height: 1.4; /* Improved readability */
+}
+
+.chat-input {
+    display: flex;
+    padding: 15px; /* Increased padding */
+    border-top: 1px solid #ccc;
+}
+
+#messageInput {
+    flex-grow: 1;
+    padding: 10px; /* Increased padding */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px; /* Increased font size */
+}
+
+#sendButton {
+    margin-left: 15px;
+    padding: 10px 20px; /* Increased padding */
+    font-size: 16px; /* Increased font size */
+}
+
 
 .match-list h2 {
     padding: 10px;
@@ -19,52 +71,55 @@
     color: white;
 }
 
+
 #matchList {
     list-style-type: none;
     padding: 0;
     margin: 0;
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
-#matchList li {
-    padding: 10px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
+
 
 #matchList li:hover {
     background-color: #f0f0f0;
 }
 
 #matchList li.active {
-    background-color: #e0e0e0;
+    background-color: #ead5d5;
     font-weight: bold;
 }
 
-.chat-window {
-    width: 80%;
-    display: flex;
-    flex-direction: column;
-}
 
 #chatHeader {
     padding: 10px;
     margin: 0;
     background-color: var(--company-color);
     color: white;
+    font-size: 1.2em;
+    font-weight: normal;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-#chatMessages {
-    flex-grow: 1;
-    overflow-y: auto;
+
+
+
+.match-list li {
+    cursor: pointer;
     padding: 10px;
+    margin: 5px 0;
 }
 
-.message {
-    margin-bottom: 10px;
-    padding: 5px 10px;
-    border-radius: 5px;
-    max-width: 70%;
+.match-list li.active {
+    background-color: var(--company-color);
+    color: white;
 }
+
+/* Rest of the CSS remains the same */
+
+
 
 .message.sent {
     align-self: flex-end;
@@ -76,30 +131,29 @@
     background-color: #f0f0f0;
 }
 
-.chat-input {
-    display: flex;
-    padding: 10px;
-    border-top: 1px solid #ccc;
-}
-
-#messageInput {
-    flex-grow: 1;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-}
-
-#sendButton {
-    margin-left: 10px;
-    padding: 5px 10px;
-    background-color: var(--company-color);
-    color: white;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
 #sendButton:disabled {
     background-color: #ccc;
     cursor: not-allowed;
+}
+
+
+@media (max-width: 768px) {
+    .chat-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .match-list, .chat-window {
+        width: 100%;
+    }
+
+    .match-list {
+        height: 30vh;
+        border-right: none;
+        border-bottom: 1px solid #ccc;
+    }
+
+    #chatMessages {
+        height: 50vh;
+    }
 }
