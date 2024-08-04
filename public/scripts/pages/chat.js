@@ -1,5 +1,5 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
-import { getFirestore, collection, query, where, onSnapshot, addDoc, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { getFirestore, collection, query, where, onSnapshot, addDoc, orderBy, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { initializeMenu } from '../common/menu.js';
 
 let db;
@@ -47,39 +47,54 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function getUserName(userId) {
-        const userDoc = await getDocs(doc(db, 'users', userId));
-        return userDoc.exists() ? userDoc.data().name : 'Unknown User';
+        const userDocRef = doc(db, 'users', userId);
+        const userDocSnap = await getDoc(userDocRef);
+        return userDocSnap.exists() ? userDocSnap.data().name : 'Unknown User';
     }
 
     function loadChat(partnerId, partnerName) {
         currentChatPartner = partnerId;
         chatHeader.textContent = `Chat with ${partnerName}`;
-        chatMessages.innerHTML = '';
-
+        chatMessages.innerHTML = '<p>Loading messages...</p>';
+    
         const messagesRef = collection(db, 'messages');
         const q = query(
             messagesRef,
-            where('users', 'in', [[auth.currentUser.uid, partnerId], [partnerId, auth.currentUser.uid]]),
+            where('users', 'array-contains', auth.currentUser.uid),
             orderBy('timestamp')
         );
-
-        onSnapshot(q, (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === 'added') {
-                    const message = change.doc.data();
+    
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            chatMessages.innerHTML = '';
+            snapshot.docs.forEach((doc) => {
+                const message = doc.data();
+                if (message.users.includes(partnerId)) {
                     displayMessage(message);
                 }
             });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, (error) => {
+            console.error("Error loading chat:", error);
+            chatMessages.innerHTML = '<p>Error loading messages. Please try again later.</p>';
         });
+    
+        // Return the unsubscribe function
+        return unsubscribe;
     }
 
     function displayMessage(message) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
-        messageElement.classList.add(message.sender === auth.currentUser.uid ? 'sent' : 'received');
-        messageElement.textContent = message.text;
+        const isCurrentUser = message.sender === auth.currentUser.uid;
+        messageElement.classList.add(isCurrentUser ? 'sent' : 'received');
+        
+        const senderName = isCurrentUser ? 'You' : currentChatPartner;
+        messageElement.innerHTML = `
+            <strong>${senderName}:</strong>
+            <span>${message.text}</span>
+        `;
+        
         chatMessages.appendChild(messageElement);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     sendButton.onclick = sendMessage;
@@ -101,6 +116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 messageInput.value = '';
             } catch (error) {
                 console.error('Error sending message:', error);
+                alert('Failed to send message. Please try again.');
             }
         }
     }
