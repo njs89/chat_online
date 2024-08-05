@@ -82,17 +82,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function updateMatchButton(isMatched) {
         matchButton.textContent = isMatched ? 'Unmatch' : 'Match';
-        matchButton.onclick = () => handleMatchAction(profiles[currentProfileIndex].id, isMatched);
     }
 
-    async function handleMatchAction(partnerId, isMatched) {
-        if (isMatched) {
+    async function handleMatchAction(partnerId) {
+        const initialMatchStatus = await checkIfMatched(partnerId);
+        console.log("Initial match status:", initialMatchStatus);
+    
+        if (initialMatchStatus) {
             await unmatch(partnerId);
+            console.log("Unmatched");
+            alert("You have unmatched with this user.");
         } else {
-            await saveMatch(partnerId);
+            const matchResult = await saveMatch(partnerId);
+            console.log("Match result:", matchResult);
+            // The alert is now handled inside saveMatch
         }
-        await updateProfileDisplay(profiles[currentProfileIndex]);
+    
+        const newMatchStatus = await checkIfMatched(partnerId);
+        console.log("New match status:", newMatchStatus);
+        updateMatchButton(newMatchStatus);
     }
+
 
     function updateCarouselImage(images) {
         if (images.length > 0) {
@@ -128,9 +138,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateProfileDisplay(profiles[currentProfileIndex]);
     });
 
-    matchButton.addEventListener('click', () => {
+    matchButton.addEventListener('click', async () => {
+        console.log("Match button clicked");
         const currentProfile = profiles[currentProfileIndex];
-        saveMatch(currentProfile.id);
+        await handleMatchAction(currentProfile.id);
     });
 
     closeButton.addEventListener('click', () => {
@@ -164,17 +175,25 @@ async function checkIfMatched(partnerId) {
     const matchesRef = collection(db, 'matches');
     const q = query(
         matchesRef,
-        where('userId', '==', auth.currentUser.uid),
-        where('partnerId', '==', partnerId)
+        where('users', 'array-contains', auth.currentUser.uid)
     );
     const querySnapshot = await getDocs(q);
-    return !querySnapshot.empty;
+    
+    const matchDoc = querySnapshot.docs.find(doc => doc.data().users.includes(partnerId));
+    
+    if (matchDoc) {
+        const matchData = matchDoc.data();
+        return matchData.matchedBy.includes(auth.currentUser.uid) && matchData.matchedBy.includes(partnerId);
+    }
+    
+    return false;
 }
+
 
 async function saveMatch(partnerId) {
     if (!db || !auth.currentUser) {
         console.error('Database or user not initialized');
-        return;
+        return false;
     }
 
     try {
@@ -205,8 +224,10 @@ async function saveMatch(partnerId) {
                 } else {
                     alert('Match request sent!');
                 }
+                return true;
             } else {
                 alert('You already matched with this user!');
+                return false;
             }
         } else {
             // No match document exists, so create a new one
@@ -216,11 +237,14 @@ async function saveMatch(partnerId) {
                 timestamp: new Date()
             });
             alert('Match request sent!');
+            return true;
         }
     } catch (error) {
         console.error('Error saving match:', error);
+        return false;
     }
 }
+
 
 async function checkForMutualMatch(partnerId) {
     if (!db || !auth.currentUser) {
@@ -248,7 +272,7 @@ async function checkForMutualMatch(partnerId) {
 async function unmatch(partnerId) {
     if (!db || !auth.currentUser) {
         console.error('Database or user not initialized');
-        return;
+        return false;
     }
 
     try {
@@ -263,9 +287,13 @@ async function unmatch(partnerId) {
         if (matchToDelete) {
             await deleteDoc(doc(db, 'matches', matchToDelete.id));
             console.log('Unmatched successfully');
+            alert('Unmatched successfully');
+            return true;
         }
+        return false;
     } catch (error) {
         console.error('Error unmatching:', error);
+        return false;
     }
 }
 
