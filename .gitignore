@@ -1,5 +1,7 @@
 # openai key
 *.env
+.runtimeconfig.json
+/.runtimeconfig.json
 
 #node_modules
 node_modules/
