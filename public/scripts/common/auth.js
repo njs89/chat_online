@@ -1,14 +1,27 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile, GoogleAuthProvider, fetchSignInMethodsForEmail } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
 import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { deleteObject, getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
 
-
-
-export function register(auth, email, password) {
-    return createUserWithEmailAndPassword(auth, email, password)
-        .catch(error => {
+export async function register(auth, email, password) {
+    try {
+        return await createUserWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+            throw new Error('This email is already registered. Please use a different email or try logging in.');
+        } else {
             console.error('Registration Error:', error.code, error.message);
-        });
+            throw new Error('Registration failed. Please try again later.');
+        }
+    }
+}
+export async function checkIfEmailExists(auth, email) {
+    try {
+        const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+        return signInMethods.length > 0;
+    } catch (error) {
+        console.error("Error checking email existence:", error);
+        return false;
+    }
 }
 
 export function login(auth, email, password) {
@@ -22,6 +35,7 @@ export function registerWithGoogle(auth, googleProvider) {
     return signInWithPopup(auth, googleProvider)
         .catch(error => {
             console.error('Google Registration Error:', error.code, error.message);
+            throw error; // Rethrow the error so it can be caught in register.js
         });
 }
 

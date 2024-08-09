@@ -1,8 +1,9 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
-import { register, registerWithGoogle, updateUserProfile, uploadImages } from '../common/auth.js';
+import { register, registerWithGoogle, updateUserProfile, uploadImages, checkIfEmailExists } from '../common/auth.js';
+import { GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const { auth, googleProvider, storage } = await initializeFirebase();
+    const { auth, storage } = await initializeFirebase();
     const registerForm = document.getElementById('registerForm');
     const googleRegisterButton = document.getElementById('googleRegisterButton');
     const confirmationPopup = document.getElementById('confirmationPopup');
@@ -144,7 +145,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-
     function updateImagePreview() {
         imagePreviewContainer.innerHTML = '';
         croppedImages.forEach((file, index) => {
@@ -172,7 +172,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Disable the file input if max images are reached
         profileImagesInput.disabled = croppedImages.length >= 5;
     }
-
     if (registerForm) {
         registerForm.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -181,37 +180,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             const userInput = gatherUserInput();
         
             try {
+                const emailExists = await checkIfEmailExists(auth, email);
+                if (emailExists) {
+                    throw new Error('This email is already registered. Please use a different email or try logging in.');
+                }
                 const userCredential = await register(auth, email, password);
                 const imageUrls = await uploadImages(storage, userCredential.user.uid, userInput.croppedImages);
                 await updateUserProfile(userCredential.user, userInput.name, userInput.gender, userInput.hobbies, userInput.aboutYou, imageUrls);
                 console.log('User registered and profile updated successfully');
                 window.location.href = '/mainpage.html';
             } catch (error) {
-                console.error('Registration failed:', error.message);
-                alert('Registration failed: ' + error.message);
+                console.log('Registration could not be completed:', error.message);
+                alert(error.message);
             }
         });
     }
-
     if (googleRegisterButton) {
         googleRegisterButton.addEventListener('click', async () => {
-            const userInput = gatherUserInput();
-            await registerWithGoogle(auth, googleProvider)
-                .then(async (credential) => {
-                    pendingCredential = credential;
-                    confirmationMessage.textContent = `You are registering as ${credential.user.email}. Do you want to continue?`;
-                    confirmationPopup.classList.remove('hidden');
-                    
-                    // Upload images and update profile
-                    const imageUrls = await uploadImages(storage, credential.user.uid, userInput.croppedImages);
-                    await updateUserProfile(credential.user, userInput.name, userInput.gender, userInput.hobbies, userInput.aboutYou, imageUrls);
-                })
-                .catch(error => {
-                    console.error('Google Registration Failed:', error.message);
-                });
+            try {
+                const provider = new GoogleAuthProvider();
+                const result = await registerWithGoogle(auth, provider);
+                const email = result.user.email;
+
+                const emailExists = await checkIfEmailExists(auth, email);
+                if (emailExists) {
+                    await auth.signOut();
+                    throw new Error('This Google account is already registered. Please use a different account or log in.');
+                }
+
+                const userInput = gatherUserInput();
+                pendingCredential = result;
+                confirmationMessage.textContent = `You are registering as ${email}. Do you want to continue?`;
+                confirmationPopup.classList.remove('hidden');
+                
+                // Upload images and update profile
+                const imageUrls = await uploadImages(storage, result.user.uid, userInput.croppedImages);
+                await updateUserProfile(result.user, userInput.name, userInput.gender, userInput.hobbies, userInput.aboutYou, imageUrls);
+            } catch (error) {
+                console.error('Google Registration Failed:', error.message);
+                alert('Google Registration Failed: ' + error.message);
+            }
         });
     }
-
     confirmButton.addEventListener('click', () => {
         confirmationPopup.classList.add('hidden');
         console.log(`User ${pendingCredential.user.email} confirmed registration`);
