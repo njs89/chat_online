@@ -26,6 +26,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     let cropper;
     let croppedImages = [];
 
+    function gatherUserInput() {
+        return {
+            name: document.getElementById('name').value,
+            gender: document.getElementById('gender').value,
+            hobbies: document.getElementById('hobbies').value.split(',').map(hobby => hobby.trim()),
+            aboutYou: document.getElementById('aboutYou').value,
+            croppedImages: croppedImages
+        };
+    }
+
     function showStep(stepIndex) {
         steps.forEach((step, index) => {
             if (index === stepIndex) {
@@ -168,15 +178,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             event.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const name = document.getElementById('name').value;
-            const gender = document.getElementById('gender').value;
-            const hobbies = document.getElementById('hobbies').value.split(',').map(hobby => hobby.trim());
-            const aboutYou = document.getElementById('aboutYou').value;
+            const userInput = gatherUserInput();
         
             try {
                 const userCredential = await register(auth, email, password);
-                const imageUrls = await uploadImages(storage, userCredential.user.uid, croppedImages);
-                await updateUserProfile(userCredential.user, name, gender, hobbies, aboutYou, imageUrls);
+                const imageUrls = await uploadImages(storage, userCredential.user.uid, userInput.croppedImages);
+                await updateUserProfile(userCredential.user, userInput.name, userInput.gender, userInput.hobbies, userInput.aboutYou, imageUrls);
                 console.log('User registered and profile updated successfully');
                 window.location.href = '/mainpage.html';
             } catch (error) {
@@ -188,11 +195,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (googleRegisterButton) {
         googleRegisterButton.addEventListener('click', async () => {
+            const userInput = gatherUserInput();
             await registerWithGoogle(auth, googleProvider)
-                .then(credential => {
+                .then(async (credential) => {
                     pendingCredential = credential;
                     confirmationMessage.textContent = `You are registering as ${credential.user.email}. Do you want to continue?`;
                     confirmationPopup.classList.remove('hidden');
+                    
+                    // Upload images and update profile
+                    const imageUrls = await uploadImages(storage, credential.user.uid, userInput.croppedImages);
+                    await updateUserProfile(credential.user, userInput.name, userInput.gender, userInput.hobbies, userInput.aboutYou, imageUrls);
                 })
                 .catch(error => {
                     console.error('Google Registration Failed:', error.message);
