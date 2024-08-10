@@ -1,5 +1,5 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
-import { collection, getDocs, query, where, addDoc, updateDoc, deleteDoc, doc, arrayUnion } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { getFirestore, collection, getDocs, query, where, addDoc, updateDoc, deleteDoc, doc, arrayUnion } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { initializeMenu } from '../common/menu.js';
 import { ensureAuthenticated } from '../common/auth.js';
 
@@ -35,17 +35,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const PLACEHOLDER_IMAGE_PATH = '/images/placeholder.png';
 
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            try {
-                await loadProfiles();
-            } catch (error) {
-                console.error("Error fetching user profiles:", error);
-            }
-        } else {
-            window.location.href = '/index.html';
+    try {
+        const user = await ensureAuthenticated(auth);
+        console.log('User is authenticated:', user.uid);
+        try {
+            await loadProfiles();
+        } catch (error) {
+            console.error("Error fetching user profiles:", error);
         }
-    });
+    } catch (error) {
+        console.error('Authentication error:', error);
+    }
 
     async function loadProfiles() {
         const usersSnapshot = await getDocs(collection(db, "users"));
