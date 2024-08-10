@@ -14,6 +14,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cancelButton = document.getElementById('cancelButton');
     let pendingCredential;
 
+    //name
+    const nameInput = document.getElementById('name');
+    const nameNextBtn = document.getElementById('nameNextBtn');
+    nameInput.addEventListener('input', () => {
+        if (nameInput.value.length >= 2) {
+            nameNextBtn.disabled = false;
+        } else {
+            nameNextBtn.disabled = true;
+        }
+    });
+
     // Step navigation
     const steps = document.querySelectorAll('.form-step');
     const nextButtons = document.querySelectorAll('.next-btn');
@@ -31,18 +42,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function gatherUserInput() {
         return {
-            name: document.getElementById('name').value,
-            gender: document.getElementById('gender').value,
-            hobbies: document.getElementById('hobbies').value.split(',').map(hobby => hobby.trim()),
-            aboutYou: document.getElementById('aboutYou').value,
+            name: document.getElementById('name').value || null,
+            gender: document.getElementById('gender').value || null,
+            hobbies: document.getElementById('hobbies').value ? document.getElementById('hobbies').value.split(',').map(hobby => hobby.trim()) : [],
+            aboutYou: document.getElementById('aboutYou').value || null,
             croppedImages: croppedImages
         };
     }
-
     function showStep(stepIndex) {
         steps.forEach((step, index) => {
             if (index === stepIndex) {
                 step.classList.add('active');
+                if (index === 0) {
+                    // Reset name input validation when returning to the first step
+                    nameNextBtn.disabled = nameInput.value.length < 2;
+                }
             } else {
                 step.classList.remove('active');
             }

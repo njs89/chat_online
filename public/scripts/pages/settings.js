@@ -1,5 +1,5 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
-import { logout } from '../common/auth.js';
+import { logout, ensureAuthenticated } from '../common/auth.js';
 import { initializeMenu } from '../common/menu.js';
 import { doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { ref, listAll, deleteObject } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
@@ -13,11 +13,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const confirmDeleteButton = document.getElementById('confirmDelete');
     const cancelDeleteButton = document.getElementById('cancelDelete');
 
-    auth.onAuthStateChanged((user) => {
-        if (!user) {
-            window.location.href = '/index.html';
-        }
-    });
+    try {
+        const user = await ensureAuthenticated(auth);
+        console.log('User is authenticated:', user.uid);
+    } catch (error) {
+        console.error('Authentication error:', error);
+    }
 
     logoutButton.addEventListener('click', async () => {
         try {

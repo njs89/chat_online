@@ -1,6 +1,7 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
 import { collection, query, where, onSnapshot, addDoc, orderBy, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { initializeMenu } from '../common/menu.js';
+import { ensureAuthenticated } from '../common/auth.js';
 
 let db;
 let auth;
@@ -20,15 +21,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sendButton = document.getElementById('sendButton');
     const chatHeader = document.getElementById('chatHeader');
 
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            console.log('User authenticated');
-            loadMatches();
-        } else {
-            console.log('User not authenticated, redirecting');
-            window.location.href = '/index.html';
-        }
-    });
+    try {
+        const user = await ensureAuthenticated(auth);
+        console.log('User is authenticated:', user.uid);
+    } catch (error) {
+        console.error('Authentication error:', error);
+    }
 
     sendButton.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {

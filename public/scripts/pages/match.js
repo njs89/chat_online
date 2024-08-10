@@ -1,6 +1,7 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
 import { collection, getDocs, query, where, addDoc, updateDoc, deleteDoc, doc, arrayUnion } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { initializeMenu } from '../common/menu.js';
+import { ensureAuthenticated } from '../common/auth.js';
 
 let db;
 let auth;

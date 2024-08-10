@@ -2,6 +2,7 @@ import { createUserWithEmailAndPassword, signOut, updateProfile, fetchSignInMeth
 import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { deleteObject, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
 
+//register login authentification
 export async function register(auth, email, password) {
     try {
         return await createUserWithEmailAndPassword(auth, email, password);
@@ -48,6 +49,20 @@ export async function updateUserProfile(user, name, gender, hobbies, aboutYou, i
     });
 }
 
+export function ensureAuthenticated(auth, redirectPath = '/index.html') {
+    return new Promise((resolve) => {
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = redirectPath;
+            } else {
+                resolve(user);
+            }
+        });
+    });
+}
+
+//image functions
+
 export async function uploadImages(storage, userId, imageFiles) {
     const imageUrls = [];
     for (let i = 0; i < Math.min(imageFiles.length, 5); i++) {
@@ -71,7 +86,6 @@ export async function uploadImages(storage, userId, imageFiles) {
     }
     return imageUrls;
 }
-
 
 async function resizeImageIfNeeded(file, targetWidth, targetHeight) {
     return new Promise((resolve) => {
