@@ -1,6 +1,8 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
 import { register, registerWithGoogle, updateUserProfile, uploadImages, checkIfEmailExists } from '../common/auth.js';
 import { GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     const { auth, storage } = await initializeFirebase();
@@ -195,26 +197,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
+    
     async function handleGoogleAuth() {
         try {
             console.log("Starting Google Authentication");
             const provider = new GoogleAuthProvider();
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
+            
             console.log("Google Authentication successful", user);
     
-            console.log("Checking sign-in methods for:", user.email);
-            const signInMethods = await fetchSignInMethodsForEmail(auth, user.email);
-            console.log("Sign-in methods:", signInMethods);
-    
-            //const isNewUser = signInMethods.length === 0;
-            const isNewUser = user.providerData.length === 0;
+            const isNewUser = await checkIfNewUser(user);
             console.log("Is new user?", isNewUser);
     
             if (isNewUser) {
-                console.log("Proceeding with new user registration");  
-                // This is a new user, proceed with your registration process
+                console.log("Proceeding with new user registration");
                 const userInput = gatherUserInput();
                 confirmationMessage.textContent = `You are registering as ${user.email}. Do you want to continue?`;
                 confirmationPopup.classList.remove('hidden');
@@ -224,6 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const imageUrls = await uploadImages(storage, user.uid, userInput.croppedImages);
                         await updateUserProfile(user, userInput.name, userInput.gender, userInput.hobbies, userInput.aboutYou, imageUrls);
+                        await markUserAsRegistered(user.uid);
                         console.log(`User ${user.email} registered successfully`);
                         window.location.href = '/mainpage.html';
                     } catch (error) {
@@ -239,8 +237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     await auth.signOut();
                 };
             } else {
-                console.log("Handling existing user");    
-                // This is an existing user
+                console.log("Handling existing user");
                 confirmationMessage.textContent = `Welcome back! You're already registered with ${user.email}. Do you want to log in?`;
                 confirmationPopup.classList.remove('hidden');
     
@@ -262,7 +259,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Google Authentication Failed: ' + error.message);
         }
     }
-
+    
+    async function checkIfNewUser(user) {
+        const db = getFirestore();
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
+            return true;  // User document doesn't exist, so it's a new user
+        }
+        
+        const userData = userDoc.data();
+        return !userData.isRegistered;  // If isRegistered is false or doesn't exist, treat as new user
+    }
+    
+    async function markUserAsRegistered(userId) {
+        const db = getFirestore();
+        const userRef = doc(db, "users", userId);
+        await setDoc(userRef, { isRegistered: true }, { merge: true });
+    }
     // Use this function for your Google auth button
     if (googleRegisterButton) {
         googleRegisterButton.addEventListener('click', handleGoogleAuth);
