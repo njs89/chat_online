@@ -1,8 +1,8 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
 import { logout } from '../common/auth.js';
 import { initializeMenu } from '../common/menu.js';
-import { getFirestore, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
-import { getStorage, ref, listAll, deleteObject } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
+import { doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { ref, listAll, deleteObject } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     initializeMenu();
