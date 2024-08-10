@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const user = await ensureAuthenticated(auth);
         console.log('User is authenticated:', user.uid);
+        loadMatches()
     } catch (error) {
         console.error('Authentication error:', error);
     }
@@ -42,7 +43,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             matchList.innerHTML = '';
             for (const doc of snapshot.docs) {
                 const match = doc.data();
-                if (match.matchedBy.includes(auth.currentUser.uid) && match.matchedBy.length > 1) {
+                if (match.matchedBy && match.matchedBy.includes(auth.currentUser.uid) && match.matchedBy.length > 1) {
+                //if (match.matchedBy.includes(auth.currentUser.uid) && match.matchedBy.length > 1) {
                     const partnerId = match.users.find(id => id !== auth.currentUser.uid);
                     const partnerName = await getUserName(partnerId);
                     const listItem = document.createElement('li');
