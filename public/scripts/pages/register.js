@@ -198,6 +198,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
+    if (googleRegisterButton) {
+        googleRegisterButton.addEventListener('click', handleGoogleAuth);
+    }
+    
     async function handleGoogleAuth() {
         try {
             console.log("Starting Google Authentication");
@@ -261,26 +265,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     async function checkIfNewUser(user) {
+        console.log("Checking if user is new:", user.uid);
         const db = getFirestore();
         const userRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userRef);
         
-        if (!userDoc.exists()) {
-            return true;  // User document doesn't exist, so it's a new user
+        try {
+            const userDoc = await getDoc(userRef);
+            console.log("User document exists:", userDoc.exists());
+            
+            if (!userDoc.exists()) {
+                console.log("User document doesn't exist, treating as new user");
+                return true;
+            }
+            
+            const userData = userDoc.data();
+            console.log("User data:", userData);
+            
+            if (userData.isRegistered === undefined) {
+                console.log("isRegistered field doesn't exist, treating as new user");
+                return true;
+            }
+            
+            console.log("isRegistered value:", userData.isRegistered);
+            return !userData.isRegistered;
+        } catch (error) {
+            console.error("Error checking if user is new:", error);
+            // If there's an error, we'll treat the user as new to be safe
+            return true;
         }
-        
-        const userData = userDoc.data();
-        return !userData.isRegistered;  // If isRegistered is false or doesn't exist, treat as new user
     }
-    
+
     async function markUserAsRegistered(userId) {
+        console.log("Marking user as registered:", userId);
         const db = getFirestore();
         const userRef = doc(db, "users", userId);
-        await setDoc(userRef, { isRegistered: true }, { merge: true });
-    }
-    // Use this function for your Google auth button
-    if (googleRegisterButton) {
-        googleRegisterButton.addEventListener('click', handleGoogleAuth);
+        try {   
+            await setDoc(userRef, { isRegistered: true }, { merge: true });
+            console.log("User marked as registered successfully");
+        } catch (error) {
+            console.error("Error marking user as registered:", error);
+            throw error;
+        }
     }
 
 
