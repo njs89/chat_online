@@ -1,5 +1,5 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
-import { login, register, registerWithGoogle, updateUserProfile, uploadImages, checkIfEmailExists } from '../common/auth.js';
+import { register, updateUserProfile, uploadImages, checkIfEmailExists } from '../common/auth.js';
 import { GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 

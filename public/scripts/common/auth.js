@@ -24,28 +24,6 @@ export async function checkIfEmailExists(auth, email) {
     }
 }
 
-export function login(auth, email, password) {
-    return signInWithEmailAndPassword(auth, email, password)
-        .catch(error => {
-            console.error('Login Error:', error.code, error.message);
-        });
-}
-
-export async function registerWithGoogle(auth, googleProvider) {
-    try {
-        const result = await signInWithPopup(auth, googleProvider);
-        // Instead of throwing an error, return an object with user info and a flag
-        const userExists = await checkIfEmailExists(auth, result.user.email);
-        return {
-            user: result.user,
-            isExistingUser: userExists
-        };
-    } catch (error) {
-        console.error('Google Authentication Error:', error.code, error.message);
-        throw error;
-    }
-}
-
 export function logout(auth) {
     return signOut(auth)
         .then(() => {
