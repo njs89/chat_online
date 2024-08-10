@@ -190,7 +190,6 @@ async function checkIfMatched(partnerId) {
     return false;
 }
 
-
 async function saveMatch(partnerId) {
     if (!db || !auth.currentUser) {
         console.error('Database or user not initialized');

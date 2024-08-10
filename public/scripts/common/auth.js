@@ -75,12 +75,9 @@ export async function uploadImages(storage, userId, imageFiles) {
             imageUrls.push(url);
         } catch (error) {
             console.error('Error uploading image:', error);
-            if (error.code === 'storage/canceled') {
-                alert('Image upload was canceled. Please try again.');
-            } else {
-                alert('Failed to upload image. Please check your internet connection and try again.');
-            }
-            // Don't continue with the next image if there's an error
+            console.error('Error code:', error.code);
+            console.error('Error message:', error.message);
+            alert(`Upload failed: ${error.message}`);
             break;
         }
     }
