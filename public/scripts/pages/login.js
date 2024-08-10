@@ -1,11 +1,11 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
-import { register, registerWithGoogle, updateUserProfile, uploadImages, checkIfEmailExists } from '../common/auth.js';
-import { GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+import { login, register, registerWithGoogle, updateUserProfile, uploadImages, checkIfEmailExists } from '../common/auth.js';
+import { GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const { auth, storage } = await initializeFirebase();
-    const loginForm = document.getElementById('registerForm');
+    const loginForm = document.getElementById('loginForm');
     const googleLoginButton = document.getElementById('googleLoginButton');
     const confirmationPopup = document.getElementById('confirmationPopup');
     const confirmationMessage = document.getElementById('confirmationMessage');
