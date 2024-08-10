@@ -31,12 +31,19 @@ export function login(auth, email, password) {
         });
 }
 
-export function registerWithGoogle(auth, googleProvider) {
-    return signInWithPopup(auth, googleProvider)
-        .catch(error => {
-            console.error('Google Registration Error:', error.code, error.message);
-            throw error; // Rethrow the error so it can be caught in register.js
-        });
+export async function registerWithGoogle(auth, googleProvider) {
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        // Instead of throwing an error, return an object with user info and a flag
+        const userExists = await checkIfEmailExists(auth, result.user.email);
+        return {
+            user: result.user,
+            isExistingUser: userExists
+        };
+    } catch (error) {
+        console.error('Google Authentication Error:', error.code, error.message);
+        throw error;
+    }
 }
 
 export function logout(auth) {

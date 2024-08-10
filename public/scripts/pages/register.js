@@ -1,6 +1,6 @@
 import { initializeFirebase } from '../common/firebaseConfig.js';
 import { register, registerWithGoogle, updateUserProfile, uploadImages, checkIfEmailExists } from '../common/auth.js';
-import { GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+import { GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const { auth, storage } = await initializeFirebase();
@@ -195,33 +195,80 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-    if (googleRegisterButton) {
-        googleRegisterButton.addEventListener('click', async () => {
-            try {
-                const provider = new GoogleAuthProvider();
-                const result = await registerWithGoogle(auth, provider);
-                const email = result.user.email;
 
-                const emailExists = await checkIfEmailExists(auth, email);
-                if (emailExists) {
-                    await auth.signOut();
-                    throw new Error('This Google account is already registered. Please use a different account or log in.');
-                }
-
+    async function handleGoogleAuth() {
+        try {
+            console.log("Starting Google Authentication");
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            console.log("Google Authentication successful", user);
+    
+            console.log("Checking sign-in methods for:", user.email);
+            const signInMethods = await fetchSignInMethodsForEmail(auth, user.email);
+            console.log("Sign-in methods:", signInMethods);
+    
+            //const isNewUser = signInMethods.length === 0;
+            const isNewUser = user.providerData.length === 0;
+            console.log("Is new user?", isNewUser);
+    
+            if (isNewUser) {
+                console.log("Proceeding with new user registration");  
+                // This is a new user, proceed with your registration process
                 const userInput = gatherUserInput();
-                pendingCredential = result;
-                confirmationMessage.textContent = `You are registering as ${email}. Do you want to continue?`;
+                confirmationMessage.textContent = `You are registering as ${user.email}. Do you want to continue?`;
                 confirmationPopup.classList.remove('hidden');
-                
-                // Upload images and update profile
-                const imageUrls = await uploadImages(storage, result.user.uid, userInput.croppedImages);
-                await updateUserProfile(result.user, userInput.name, userInput.gender, userInput.hobbies, userInput.aboutYou, imageUrls);
-            } catch (error) {
-                console.error('Google Registration Failed:', error.message);
-                alert('Google Registration Failed: ' + error.message);
+    
+                confirmButton.onclick = async () => {
+                    confirmationPopup.classList.add('hidden');
+                    try {
+                        const imageUrls = await uploadImages(storage, user.uid, userInput.croppedImages);
+                        await updateUserProfile(user, userInput.name, userInput.gender, userInput.hobbies, userInput.aboutYou, imageUrls);
+                        console.log(`User ${user.email} registered successfully`);
+                        window.location.href = '/mainpage.html';
+                    } catch (error) {
+                        console.error('Error updating profile:', error);
+                        alert('Failed to complete registration. Please try again.');
+                        await auth.signOut();
+                    }
+                };
+    
+                cancelButton.onclick = async () => {
+                    confirmationPopup.classList.add('hidden');
+                    console.log('User cancelled the registration');
+                    await auth.signOut();
+                };
+            } else {
+                console.log("Handling existing user");    
+                // This is an existing user
+                confirmationMessage.textContent = `Welcome back! You're already registered with ${user.email}. Do you want to log in?`;
+                confirmationPopup.classList.remove('hidden');
+    
+                confirmButton.onclick = () => {
+                    confirmationPopup.classList.add('hidden');
+                    console.log(`User ${user.email} logged in`);
+                    window.location.href = '/mainpage.html';
+                };
+    
+                cancelButton.onclick = async () => {
+                    confirmationPopup.classList.add('hidden');
+                    console.log('User cancelled the login');
+                    await auth.signOut();
+                };
             }
-        });
+        } catch (error) {
+            console.error('Google Authentication Error:', error);
+            console.error('Error details:', error.code, error.message);
+            alert('Google Authentication Failed: ' + error.message);
+        }
     }
+
+    // Use this function for your Google auth button
+    if (googleRegisterButton) {
+        googleRegisterButton.addEventListener('click', handleGoogleAuth);
+    }
+
+
     confirmButton.addEventListener('click', () => {
         confirmationPopup.classList.add('hidden');
         console.log(`User ${pendingCredential.user.email} confirmed registration`);
