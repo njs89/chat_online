@@ -2,3 +2,7 @@ next:
 design sucks.
 Chat enweder 2 ebenen wie bbei whats app
 oder irgendwie den Desktop breiter hinkriegen...
+
+menu atm good for phone.
+but overlaps the Chat.
+somehow make a fixed Bottom for each page?

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat</title>
-    <link rel="stylesheet" href="/styles/main_styles.css">
     <link rel="stylesheet" href="/styles/menu.css">
     <link rel="stylesheet" href="/styles/chat.css">
     <script type="module" src="/scripts/pages/chat.js" defer></script>
@@ -13,17 +12,21 @@
     <header class="header">
         <h1>Chat</h1>
     </header>
-    <main class="main-content">
+    <main class="controlbox">
         <div class="chat-container">
             <div class="match-list">
-                <h2>Matches</h2>
-                <ul id="matchList"></ul>
+                <h2 class="section-header">Matches</h2>
+                <ul id="matchList">
+                    <!-- Match list items will be dynamically added here -->
+                </ul>
             </div>
             <div class="chat-window">
-                <h2 id="chatHeader">Select a match to start chatting</h2>
-                <div id="chatMessages"></div>
+                <h2 id="chatHeader" class="section-header">Select a match to start chatting</h2>
+                <div id="chatMessages">
+                    <!-- Chat messages will be dynamically added here -->
+                </div>
                 <div class="chat-input">
-                    <input type="text" id="messageInput" placeholder="Type your message..." disabled>
+                    <input type="text" id="messageInput" placeholder="Type a message..." disabled>
                     <button id="sendButton" disabled>Send</button>
                 </div>
             </div>

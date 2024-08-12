@@ -1,12 +1,15 @@
+/* Base styles (mobile-first) */
 .bottom-menu {
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 100%;
+    right: 0;
     background-color: var(--company-color);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: space-around;
     padding: 10px 0;
+    z-index: 1000;
 }
 
 .menu-item {
@@ -14,20 +17,98 @@
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    color: white;
+    color: #ffffff;
+    font-size: 12px;
 }
 
 .menu-icon {
     width: 24px;
     height: 24px;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
 .menu-item.active {
     color: #FFD700; /* Gold color for active item */
 }
 
-/* Adjust main content to account for bottom menu */
-.main-content {
-    padding-bottom: 70px; /* Adjust based on the height of your bottom menu */
+/* Tablet styles */
+@media screen and (min-width: 768px) {
+    .bottom-menu {
+        padding: 12px 0;
+    }
+
+    .menu-item {
+        font-size: 14px;
+    }
+
+    .menu-icon {
+        width: 28px;
+        height: 28px;
+        margin-bottom: 6px;
+    }
+}
+
+/* Desktop styles */
+@media screen and (min-width: 1024px) {
+    .bottom-menu {
+        padding: 15px 0;
+        max-width: 800px;
+        margin: 0 auto;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 10px 10px 0 0;
+    }
+
+    .menu-item {
+        font-size: 16px;
+        flex-direction: row;
+    }
+
+    .menu-icon {
+        width: 32px;
+        height: 32px;
+        margin-bottom: 0;
+        margin-right: 8px;
+    }
+}
+
+/* Large desktop styles */
+@media screen and (min-width: 1440px) {
+    .bottom-menu {
+        max-width: 1000px;
+    }
+
+    .menu-item {
+        font-size: 18px;
+    }
+
+    .menu-icon {
+        width: 36px;
+        height: 36px;
+        margin-right: 10px;
+    }
+}
+
+/* Landscape mode for mobile devices */
+@media screen and (max-height: 480px) and (orientation: landscape) {
+    .bottom-menu {
+        flex-direction: row;
+        height: 100%;
+        width: 80px;
+        left: 0;
+        right: auto;
+        top: 0;
+        bottom: 0;
+    }
+
+    .menu-item {
+        flex-direction: column;
+        justify-content: center;
+        height: 25%;
+    }
+
+    .menu-icon {
+        margin-right: 0;
+        margin-bottom: 4px;
+    }
 }
