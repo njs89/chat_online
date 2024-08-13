@@ -192,6 +192,9 @@ body, html {
 
 /* Mobile Phones/Tablets (up to 768px) */
 @media (max-width: 768px) {
+    .header {
+        display: none;
+    }
     .chat-container {
         flex-direction: column;
         height: 100vh;
