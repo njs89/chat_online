@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     function hideChatOnMobile() {
             document.querySelector('.chat-container').classList.remove('show-chat');
+            backButton.style.display = 'none';  // Hide back button
     }
        
     backButton.addEventListener('click', () => {
@@ -149,6 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         sendButton.disabled = false;
         if (isMobile()) {
             document.querySelector('.chat-container').classList.add('show-chat');
+            backButton.style.display = 'flex';  // Show back button
         }
     
         const messagesRef = collection(db, 'messages');

@@ -187,7 +187,26 @@ body, html {
 
 /* Hide back button by default for all screen sizes */
 .back-button {
-    display: none;
+    display: none;  /* Hidden by default */
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1001;  /* Ensure it's above other elements */
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    color: var(--company-color);
+    font-size: 10px;
+    text-decoration: none;
+    flex-direction: column;
+    align-items: center;
+}
+
+.back-icon {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 2px;
 }
 
 /* Mobile Phones/Tablets (up to 768px) */
@@ -195,6 +214,7 @@ body, html {
     .header {
         display: none;
     }
+
     .chat-container {
         flex-direction: column;
         height: 100vh;
@@ -232,21 +252,22 @@ body, html {
         visibility: visible;
         opacity: 1;
     }
-    .back-button {
-        display: none;
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        z-index: 3;
-        padding: 5px 10px;
+    /* Add styles for the chat header */
+    
+    .chat-header {
+        display: flex;
+        align-items: center;
+        padding: 10px;
         background-color: var(--company-color);
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
     }
+    
     .show-chat .back-button {
         display: block;
+    }
+
+    /* Adjust the chat header to make room for the button */
+    .section-header {
+        padding-left: 40px; /* Add space for the button */
     }
 }
 /* Laptops and Desktops (769px to 1439px) */
