@@ -24,25 +24,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chatHeader = document.getElementById('chatHeader');
     const backButton = document.querySelector('.back-button');
 
-    // Function to show chat window
+    hideHeaderIfMobile();
+    window.addEventListener('resize', hideHeaderIfMobile);
+
+    function isMobile() {
+        return window.innerWidth < 769;
+    }
+    function hideHeaderIfMobile() {
+        const header = document.querySelector('.header');
+        if (isMobile() && header) {
+            header.style.display = 'none';
+        }
+    }
+
     function showChat() {
         chatContainer.classList.add('show-chat');
         document.body.style.overflow = 'hidden'; // Prevent body scrolling
     }
-
-    // Function to hide chat window (show match list)
+    
     function hideChat() {
         chatContainer.classList.remove('show-chat');
         document.body.style.overflow = ''; // Restore body scrolling
     }
 
-    // Check if it's a mobile device
-    function isMobile() {
-        return window.innerWidth <= 768;
-    }
-
     // Event listener for back button
-    backButton.addEventListener('click', hideChat);
+    backButton.addEventListener('click', () => {
+        hideChat();
+    });
 
     // Adjust layout on window resize
     window.addEventListener('resize', function() {
@@ -84,6 +92,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
             console.log('Matches loaded');
+            if (isMobile()) {
+                console.log('Mobile device detected, showing chat view');
+                showChat();
+            } else {
+                console.log('Desktop view, not toggling chat');
+            }
         });
     }
 
