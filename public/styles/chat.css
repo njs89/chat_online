@@ -17,9 +17,13 @@ body, html {
 .header {
     background-color: var(--company-color);
     color: white;
-    padding: 20px;
+    padding: 15px;
     text-align: center;
     font-size: 1.2em;
+    height: 60px; /* Set a default height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .page-container {
@@ -181,80 +185,65 @@ body, html {
     cursor: not-allowed;
 }
 
-/* Mobile Phones (up to 480px) */
-@media (max-width: 480px) {
-    .header {
-        padding: 0px;
-        font-size: 1em;
-    }
-    .chat-container {
-        margin: 0;
-        border: none;
-        height: 100vh;
-        min-height: 100vh;
-    }
-    .match-list {
-        height: 25%;
-        min-height: 120px;
-    }
-    .chat-window {
-        height: 75%;
-    }
-    #chatMessages {
-        height: 60vh;
-        max-height: 60vh;
-    }
-    .chat-input {
-        padding: 10px;
-    }
-    #messageInput, #sendButton {
-        font-size: 14px;
-    }
-    #sendButton {
-        padding: 8px 15px;
-    }
-    .message {
-        padding: 8px 12px;
-        font-size: 14px;
-    }
+/* Hide back button by default for all screen sizes */
+.back-button {
+    display: none;
 }
 
-/* Tablets and Small Laptops (481px to 768px) */
-@media (min-width: 481px) and (max-width: 768px) {
-    .header {
-        padding: 10px;
-        font-size: 1em;
-    }
+/* Mobile Phones/Tablets (up to 768px) */
+@media (max-width: 768px) {
     .chat-container {
         flex-direction: column;
-        height: calc(100vh - 60px);
-        min-height: 500px;
+        height: 100vh;
+        overflow: hidden;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
     }
     .match-list, .chat-window {
         width: 100%;
-    }
-    .match-list {
-        height: 30%;
-        min-height: 150px;
-        border-right: none;
-        border-bottom: 1px solid #ccc;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        overflow-y: auto;
+        transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
     }
     .chat-window {
-        height: 70%;
-        min-height: 350px;
+        visibility: hidden;
+        opacity: 0;
     }
-    #chatMessages {
-        height: 50vh;
-        max-height: 50vh;
+    .show-chat .match-list {
+        visibility: hidden;
+        opacity: 0;
     }
-    .message {
-        max-width: 90%;
+    .show-chat .chat-window {
+        visibility: visible;
+        opacity: 1;
+    }
+    .back-button {
+        display: none;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 3;
+        padding: 5px 10px;
+        background-color: var(--company-color);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .show-chat .back-button {
+        display: block;
     }
 }
-
 /* Laptops and Desktops (769px to 1439px) */
 @media (min-width: 769px) and (max-width: 1439px) {
     /* Styles from the general section apply here */
+    /* No changes needed for the new mobile design */
 }
 
 /* Large Desktops (1440px to 2559px) */

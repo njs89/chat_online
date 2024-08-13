@@ -15,16 +15,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     auth = firebaseInit.auth;
     db = firebaseInit.db;
 
+    const chatContainer = document.querySelector('.chat-container');
     const matchList = document.getElementById('matchList');
+    const chatWindow = document.querySelector('.chat-window');
     const chatMessages = document.getElementById('chatMessages');
     const messageInput = document.getElementById('messageInput');
     const sendButton = document.getElementById('sendButton');
     const chatHeader = document.getElementById('chatHeader');
+    const backButton = document.querySelector('.back-button');
+
+    // Function to show chat window
+    function showChat() {
+        chatContainer.classList.add('show-chat');
+        document.body.style.overflow = 'hidden'; // Prevent body scrolling
+    }
+
+    // Function to hide chat window (show match list)
+    function hideChat() {
+        chatContainer.classList.remove('show-chat');
+        document.body.style.overflow = ''; // Restore body scrolling
+    }
+
+    // Check if it's a mobile device
+    function isMobile() {
+        return window.innerWidth <= 768;
+    }
+
+    // Event listener for back button
+    backButton.addEventListener('click', hideChat);
+
+    // Adjust layout on window resize
+    window.addEventListener('resize', function() {
+        if (!isMobile()) {
+            hideChat();
+        }
+    });
 
     try {
         const user = await ensureAuthenticated(auth);
         console.log('User is authenticated:', user.uid);
-        loadMatches()
+        loadMatches();
     } catch (error) {
         console.error('Authentication error:', error);
     }
@@ -32,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     sendButton.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
-    });    
+    });  
 
     function loadMatches() {
         console.log('Loading matches');
@@ -44,7 +74,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             for (const doc of snapshot.docs) {
                 const match = doc.data();
                 if (match.matchedBy && match.matchedBy.includes(auth.currentUser.uid) && match.matchedBy.length > 1) {
-                //if (match.matchedBy.includes(auth.currentUser.uid) && match.matchedBy.length > 1) {
                     const partnerId = match.users.find(id => id !== auth.currentUser.uid);
                     const partnerName = await getUserName(partnerId);
                     const listItem = document.createElement('li');
@@ -64,17 +93,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         return userDocSnap.exists() ? userDocSnap.data().name : 'Unknown User';
     }
 
-
     function loadChat(partnerId, partnerName, listItem) {
         console.log('Loading chat for partner:', partnerName);
         
-        // Remove active class from previously selected match
         const activeMatch = matchList.querySelector('.active');
         if (activeMatch) {
             activeMatch.classList.remove('active');
         }
     
-        // Add active class to selected match
         listItem.classList.add('active');
     
         currentChatPartner = partnerId;
@@ -82,7 +108,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatHeader.textContent = `Chat with ${partnerName}`;
         chatMessages.innerHTML = '<p>Loading messages...</p>';
         
-        // Enable input and send button
         messageInput.disabled = false;
         sendButton.disabled = false;
     
@@ -106,8 +131,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("Error loading chat:", error);
             chatMessages.innerHTML = '<p>Error loading messages. Please try again later.</p>';
         });
-    }
 
+        if (isMobile()) {
+            console.log('Mobile device detected, showing chat view');
+            showChat();
+        } else {
+            console.log('Desktop view, not toggling chat');
+        }
+    }
+    
     function displayMessage(message) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
@@ -149,5 +181,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('Cannot send message: ', messageText ? 'No chat partner selected' : 'Empty message');
         }
     }
-
 });
