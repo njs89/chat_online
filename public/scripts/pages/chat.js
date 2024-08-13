@@ -36,33 +36,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             header.style.display = 'none';
         }
     }
-
-    function showChat() {
-        chatContainer.classList.add('show-chat');
-        document.body.style.overflow = 'hidden'; // Prevent body scrolling
+    function hideChatOnMobile() {
+            document.querySelector('.chat-container').classList.remove('show-chat');
     }
-    
-    function hideChat() {
-        chatContainer.classList.remove('show-chat');
-        document.body.style.overflow = ''; // Restore body scrolling
-    }
-
-    // Event listener for back button
+       
     backButton.addEventListener('click', () => {
-        hideChat();
+        hideChatOnMobile();
     });
 
-    // Adjust layout on window resize
-    window.addEventListener('resize', function() {
-        if (!isMobile()) {
-            hideChat();
-        }
-    });
 
     try {
         const user = await ensureAuthenticated(auth);
         console.log('User is authenticated:', user.uid);
-        loadMatches();
+        if (!isMobile()) {
+            loadMatches();
+        } else {
+            // On mobile, just prepare the match list without loading a chat
+            prepareMatchList();
+        }
     } catch (error) {
         console.error('Authentication error:', error);
     }
@@ -71,12 +62,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });  
-
-    function loadMatches() {
-        console.log('Loading matches');
+    function prepareMatchList() {
+        console.log('Preparing match list for mobile');
         const matchesRef = collection(db, 'matches');
         const q = query(matchesRef, where('users', 'array-contains', auth.currentUser.uid));
-
+    
         onSnapshot(q, async (snapshot) => {
             matchList.innerHTML = '';
             for (const doc of snapshot.docs) {
@@ -87,18 +77,53 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const listItem = document.createElement('li');
                     listItem.textContent = partnerName;
                     listItem.dataset.partnerId = partnerId;
-                    listItem.onclick = () => loadChat(partnerId, partnerName, listItem);
+                    listItem.onclick = () => {
+                        document.querySelector('.chat-container').classList.add('show-chat');
+                        loadChat(partnerId, partnerName, listItem);
+                    };
+                    matchList.appendChild(listItem);
+                }
+            }
+            console.log('Match list prepared');
+        });
+    }
+    function loadMatches() {
+        console.log('Loading matches');
+        const matchesRef = collection(db, 'matches');
+        const q = query(matchesRef, where('users', 'array-contains', auth.currentUser.uid));
+        onSnapshot(q, async (snapshot) => {
+            matchList.innerHTML = '';
+            for (const doc of snapshot.docs) {
+                const match = doc.data();
+                if (match.matchedBy && match.matchedBy.includes(auth.currentUser.uid) && match.matchedBy.length > 1) {
+                    const partnerId = match.users.find(id => id !== auth.currentUser.uid);
+                    const partnerName = await getUserName(partnerId);
+                    const listItem = document.createElement('li');
+                    listItem.textContent = partnerName;
+                    listItem.dataset.partnerId = partnerId;
+                    listItem.onclick = () => {
+                        if (isMobile()) {
+                            updateMobileChatIndicator(partnerName);
+                        }
+                        loadChat(partnerId, partnerName, listItem);
+                    };
+                    
                     matchList.appendChild(listItem);
                 }
             }
             console.log('Matches loaded');
-            if (isMobile()) {
-                console.log('Mobile device detected, showing chat view');
-                showChat();
-            } else {
-                console.log('Desktop view, not toggling chat');
-            }
         });
+    }
+    function updateMobileChatIndicator(partnerName) {
+        // Update some UI element to show that a chat is ready to view
+        const indicator = document.querySelector('#mobileChatIndicator');
+        indicator.textContent = `Chat loaded for ${partnerName}. Tap here to view.`;
+        indicator.style.display = 'block';
+        
+        // When this indicator is tapped, then we show the chat
+        indicator.onclick = () => {
+            document.querySelector('.chat-container').classList.add('show-chat');
+        };
     }
 
     async function getUserName(userId) {
@@ -109,12 +134,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function loadChat(partnerId, partnerName, listItem) {
         console.log('Loading chat for partner:', partnerName);
-        
         const activeMatch = matchList.querySelector('.active');
         if (activeMatch) {
             activeMatch.classList.remove('active');
         }
-    
         listItem.classList.add('active');
     
         currentChatPartner = partnerId;
@@ -124,6 +147,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         messageInput.disabled = false;
         sendButton.disabled = false;
+        if (isMobile()) {
+            document.querySelector('.chat-container').classList.add('show-chat');
+        }
     
         const messagesRef = collection(db, 'messages');
         const q = query(
@@ -145,13 +171,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("Error loading chat:", error);
             chatMessages.innerHTML = '<p>Error loading messages. Please try again later.</p>';
         });
-
-        if (isMobile()) {
-            console.log('Mobile device detected, showing chat view');
-            showChat();
-        } else {
-            console.log('Desktop view, not toggling chat');
-        }
     }
     
     function displayMessage(message) {
