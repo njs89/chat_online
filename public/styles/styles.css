@@ -74,6 +74,9 @@ body, html {
     color: var(--company-color-hover);
 }
 
+.section-header {
+    display: none;
+}    
 /* Responsive Design */
 @media (max-width: 768px) {
     .header {
@@ -100,12 +103,6 @@ body, html {
         display: block;
         margin: 10px 0;
     }
-}
-@media (min-width: 769px) {
-    /* Styles from the general section apply here */
-    .section-header {
-        display: none;
-    }    
 }
 
 /* Registration confirmation */
