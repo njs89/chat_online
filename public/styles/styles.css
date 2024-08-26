@@ -76,6 +76,19 @@ body, html {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .header {
+        display: none;
+    }    
+    .section-header {
+        padding: 10px;
+        margin: 0;
+        background-color: var(--company-color);
+        color: white;
+        font-size: 1.2em;
+        font-weight: normal;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
     .buttons {
         width: 100%;
         padding: 0 20px;
@@ -87,6 +100,12 @@ body, html {
         display: block;
         margin: 10px 0;
     }
+}
+@media (min-width: 769px) {
+    /* Styles from the general section apply here */
+    .section-header {
+        display: none;
+    }    
 }
 
 /* Registration confirmation */
