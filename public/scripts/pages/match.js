@@ -47,6 +47,63 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Authentication error:', error);
     }
 
+    // Function to check if the device is mobile
+    function isMobileDevice() {
+        return (window.innerWidth <= 768) && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    }
+
+    // Function to add swipe functionality
+    function addSwipeFunctionality() {
+        if (!isMobileDevice()) return;
+
+        let startX;
+        let isSwiping = false;
+
+        imageCarousel.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isSwiping = true;
+        });
+
+        imageCarousel.addEventListener('touchmove', (e) => {
+            if (!isSwiping) return;
+            
+            const currentX = e.touches[0].clientX;
+            const diff = startX - currentX;
+            
+            if (Math.abs(diff) > 50) { // Threshold for swipe
+                const images = profiles[currentProfileIndex].profileImages || [];
+                if (diff > 0) {
+                    // Swipe left
+                    currentImageIndex = (currentImageIndex + 1) % images.length;
+                } else {
+                    // Swipe right
+                    currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+                }
+                updateCarouselImage(images);
+                isSwiping = false;
+            }
+        });
+
+        imageCarousel.addEventListener('touchend', () => {
+            isSwiping = false;
+        });
+    }
+
+    // Add swipe functionality initially if it's a mobile device
+    addSwipeFunctionality();
+
+    // Re-check and add/remove swipe functionality on window resize
+    window.addEventListener('resize', () => {
+        if (isMobileDevice()) {
+            addSwipeFunctionality();
+        } else {
+            // Remove touch event listeners if it's not a mobile device
+            imageCarousel.removeEventListener('touchstart', null);
+            imageCarousel.removeEventListener('touchmove', null);
+            imageCarousel.removeEventListener('touchend', null);
+        }
+    });
+
     async function loadProfiles() {
         const usersSnapshot = await getDocs(collection(db, "users"));
         profiles = usersSnapshot.docs
@@ -114,6 +171,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
         } else {
             carouselImage.src = PLACEHOLDER_IMAGE_PATH;
+        }
+
+        // Update visibility of navigation buttons based on device type
+        if (isMobileDevice()) {
+            prevImageButton.style.display = 'none';
+            nextImageButton.style.display = 'none';
+        } else {
+            prevImageButton.style.display = 'block';
+            nextImageButton.style.display = 'block';
         }
     }
 

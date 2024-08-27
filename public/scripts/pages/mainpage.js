@@ -31,8 +31,63 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cropButton = document.getElementById('cropButton');
 
     let cropper;
+    let startX;
+    let isSwiping = false;
+    // Function to check if the device is mobile
+    function isMobileDevice() {
+        return (window.innerWidth <= 768) && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    }
+    // Function to add swipe functionality
+    function addSwipeFunctionality() {
+        if (!isMobileDevice()) return;
 
-        // Enable/disable fields when "Change" button is clicked
+        imageCarousel.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isSwiping = true;
+        });
+
+        imageCarousel.addEventListener('touchmove', (e) => {
+            if (!isSwiping) return;
+            
+            const currentX = e.touches[0].clientX;
+            const diff = startX - currentX;
+            
+            if (Math.abs(diff) > 50) { // Threshold for swipe
+                if (diff > 0) {
+                    // Swipe left
+                    currentImageIndex = (currentImageIndex + 1) % userImages.length;
+                } else {
+                    // Swipe right
+                    currentImageIndex = (currentImageIndex - 1 + userImages.length) % userImages.length;
+                }
+                updateCarouselImage();
+                isSwiping = false;
+            }
+        });
+
+        imageCarousel.addEventListener('touchend', () => {
+            isSwiping = false;
+        });
+    }
+
+    // Add swipe functionality initially if it's a mobile device
+    addSwipeFunctionality();
+
+    // Re-check and add/remove swipe functionality on window resize
+    window.addEventListener('resize', () => {
+        if (isMobileDevice()) {
+            addSwipeFunctionality();
+        } else {
+            // Remove touch event listeners if it's not a mobile device
+            imageCarousel.removeEventListener('touchstart', null);
+            imageCarousel.removeEventListener('touchmove', null);
+            imageCarousel.removeEventListener('touchend', null);
+        }
+    });
+
+
+
+    // Enable/disable fields when "Change" button is clicked
     document.querySelectorAll('.change-button').forEach(button => {
         button.addEventListener('click', (event) => {
             const fieldId = event.target.dataset.field;
