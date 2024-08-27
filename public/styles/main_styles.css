@@ -29,7 +29,7 @@ body, html {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Changed from center */
+    justify-content: flex-start;
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
@@ -74,10 +74,10 @@ body, html {
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
-    position: relative; /* Added for absolute positioning of buttons */
-    width: 100%; /* Ensure full width */
-    max-width: 600px; /* Limit maximum width if needed */
-    margin: 0 auto; /* Center the carousel */
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .carousel-button {
@@ -85,23 +85,23 @@ body, html {
     background: none;
     border: none;
     cursor: pointer;
-    position: absolute; /* Position buttons absolutely */
-    top: 50%; /* Center vertically */
-    transform: translateY(-50%); /* Adjust for exact centering */
-    z-index: 10; /* Ensure buttons are above the image */
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
 }
 
 #carouselImage {
-    width: 100%; /* Make image fill the container width */
-    height: auto; /* Maintain aspect ratio */
-    max-height: 400px; /* Set a maximum height */
-    object-fit: contain; /* Ensure the entire image is visible */
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: contain;
 }
 #prevImageButton {
-    left: 10px; /* Position on the left */
+    left: 10px;
 }
 #nextImageButton {
-    right: 10px; /* Position on the right */
+    right: 10px;
 }
 
 /* Modal Styles */
@@ -222,7 +222,7 @@ form button:hover {
         display: none;
     }    
     .section-header {
-        display: block; /* Show for small screens */
+        display: block;
         padding: 10px;
         margin: 0;
         background-color: var(--company-color);
@@ -237,28 +237,32 @@ form button:hover {
         margin: 5% auto;
     }
     .main-content {
-        padding: 20px 10px;
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
     }
     #userProfile {
         width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
     }
 
     .carousel {
-        max-width: 100%; /* Allow full width on mobile */
+        max-width: 100%;
     }
     .carousel-button {
-        display: none; /* Hide buttons on mobile */
+        display: none;
     }
     #carouselImage {
-        max-height: 300px; /* Adjust maximum height for mobile if needed */
+        max-width: 100%;
+        height: auto;
+        object-fit: contain;
     }
-    /* Ensure the image container allows for full image visibility */
     #imageCarousel {
-        overflow: visible; /* Changed from hidden to allow full image visibility */
+        overflow: visible;
         width: 100%;
-        height: auto; /* Allow height to adjust based on content */
+        height: auto;
     }
-    /* Additional style to ensure image is not cut off */
     .carousel img {
         max-width: 100%;
         height: auto;
@@ -267,6 +271,12 @@ form button:hover {
 
     .button, #editProfileButton, #logoutButton {
         width: 100%;
+        box-sizing: border-box;
+        max-width: none;
+    }
+
+    body {
+        overflow-x: hidden;
     }
 }
 
