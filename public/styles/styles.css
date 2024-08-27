@@ -83,6 +83,7 @@ body, html {
         display: none;
     }    
     .section-header {
+        display: block; /* Show for small screens */
         padding: 10px;
         margin: 0;
         background-color: var(--company-color);
