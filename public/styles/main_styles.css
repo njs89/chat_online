@@ -74,6 +74,10 @@ body, html {
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
+    position: relative; /* Added for absolute positioning of buttons */
+    width: 100%; /* Ensure full width */
+    max-width: 600px; /* Limit maximum width if needed */
+    margin: 0 auto; /* Center the carousel */
 }
 
 .carousel-button {
@@ -81,13 +85,23 @@ body, html {
     background: none;
     border: none;
     cursor: pointer;
+    position: absolute; /* Position buttons absolutely */
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%); /* Adjust for exact centering */
+    z-index: 10; /* Ensure buttons are above the image */
 }
 
 #carouselImage {
-    max-width: 300px;
-    max-height: 300px;
-    object-fit: cover;
-    margin: 0 10px;
+    width: 100%; /* Make image fill the container width */
+    height: auto; /* Maintain aspect ratio */
+    max-height: 400px; /* Set a maximum height */
+    object-fit: contain; /* Ensure the entire image is visible */
+}
+#prevImageButton {
+    left: 10px; /* Position on the left */
+}
+#nextImageButton {
+    right: 10px; /* Position on the right */
 }
 
 /* Modal Styles */
@@ -222,37 +236,33 @@ form button:hover {
         width: 95%;
         margin: 5% auto;
     }
-
     .main-content {
         padding: 20px 10px;
     }
-
     #userProfile {
         width: 100%;
     }
 
     .carousel {
-        flex-direction: column;
+        max-width: 100%; /* Allow full width on mobile */
     }
     .carousel-button {
         display: none; /* Hide buttons on mobile */
     }
-
-    #imageCarousel {
-        overflow-x: hidden; /* Hide horizontal scrollbar */
-        position: relative; /* For absolute positioning of images */
-        width: 100%;
-        height: 300px; /* Adjust as needed */
-    }
-
     #carouselImage {
-        position: absolute;
-        top: 0;
-        left: 0;
+        max-height: 300px; /* Adjust maximum height for mobile if needed */
+    }
+    /* Ensure the image container allows for full image visibility */
+    #imageCarousel {
+        overflow: visible; /* Changed from hidden to allow full image visibility */
         width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
+        height: auto; /* Allow height to adjust based on content */
+    }
+    /* Additional style to ensure image is not cut off */
+    .carousel img {
+        max-width: 100%;
+        height: auto;
+        object-fit: contain;
     }
 
     .button, #editProfileButton, #logoutButton {
