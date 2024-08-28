@@ -35,6 +35,8 @@ body, html {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    max-width: 300px; /* Add this line */
 }
 .button, .start-button, .test-button {
     background-color: var(--company-color);
@@ -45,7 +47,8 @@ body, html {
     border-radius: 5px;
     transition: background-color 0.3s ease;
     text-align: center;
-    width: 200px;
+    width: 100%; /* Change this from 200px to 100% */
+    max-width: 250px; /* Add this line */
 }
 .button:hover, .start-button:hover, .test-button:hover {
     background-color: var(--company-color-hover);
@@ -79,11 +82,16 @@ body, html {
 }    
 /* Responsive Design */
 @media (max-width: 768px) {
+    .main-content {
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+    }
     .header {
         display: none;
     }    
     .section-header {
-        display: block; /* Show for small screens */
+        display: block;
         padding: 10px;
         margin: 0;
         background-color: var(--company-color);
@@ -96,9 +104,11 @@ body, html {
     .buttons {
         width: 100%;
         padding: 0 20px;
+        box-sizing: border-box; /* Add this line */
     }
     .button, .start-button, .test-button {
         width: 100%;
+        max-width: none; /* Add this line */
     }
     .footer-nav ul li {
         display: block;
