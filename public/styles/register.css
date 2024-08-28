@@ -1,13 +1,20 @@
+:root {
+    --company-color: #800020;
+    --company-color-hover: #a00030;
+}
+
 .register-form {
     width: 100%;
-    max-width: 500px;
+    max-width: 300px;
     margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 .form-step {
     display: none;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
 }
 
 .form-step.active {
@@ -29,7 +36,10 @@
     box-sizing: border-box;
 }
 
-.form-step button {
+.form-step button,
+#nameNextBtn,
+#googleRegisterButton {
+    width: 100%;
     padding: 15px 30px;
     background-color: var(--company-color);
     color: white;
@@ -38,26 +48,22 @@
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease;
+    margin-top: 10px;
 }
 
-.form-step button:hover {
+.form-step button:hover,
+#nameNextBtn:hover {
     background-color: var(--company-color-hover);
-}
-
-/* Style for the first Next button */
-#nameNextBtn {
-    width: 100%;
-    margin-top: 15px;
 }
 
 .button-group {
     display: flex;
     justify-content: space-between;
-    margin-top: 15px;
+    gap: 10px;
 }
 
 .button-group button {
-    flex: 0 0 48%; /* This makes each button take up 48% of the container width */
+    flex: 1;
 }
 
 .registration-options {
@@ -81,60 +87,22 @@
     background-color: #357ae8;
 }
 
-/* Responsive styles for mobile devices */
-@media (max-width: 768px) {
-    .register-form {
-        padding: 0 20px;
-    }
-
-    .form-step input,
-    .form-step select,
-    .form-step textarea {
-        padding: 12px;
-        font-size: 14px;
-    }
-
-    .form-step button {
-        padding: 12px 20px;
-        font-size: 14px;
-    }
-
-    #nameNextBtn {
-        width: 100%;
-    }
-
-    .button-group {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .button-group button {
-        flex: none;
-        width: 100%;
-    }
-
-    /* Ensure the Google button is full width on mobile */
-    #googleRegisterButton {
-        width: 100%;
-    }
-}
-
-/* Existing styles for image cropping and preview */
+/* Image handling styles */
 #cropperContainer {
     max-width: 100%;
-    max-height: 600px;
+    max-height: 300px;
     overflow: hidden;
     margin-bottom: 15px;
 }
 
 #cropperImage {
     max-width: 100%;
-    max-height: 600px;
+    max-height: 300px;
 }
 
 #cropButton {
-    margin-top: 10px;
     display: none;
+    margin-top: 10px;
 }
 
 #imagePreviewContainer {
@@ -151,48 +119,40 @@
 }
 
 #imagePreviewContainer img {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     object-fit: cover;
 }
 
 #imagePreviewContainer button {
     margin-top: 5px;
+    padding: 5px 10px;
+    font-size: 12px;
 }
 
-#cropButton {
-    display: none;
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: var(--company-color);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-#cropButton:hover {
-    background-color: var(--company-color-hover);
-}
-
-/* Additional mobile styles for image-related elements */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    #cropperContainer {
-        max-height: 400px;
+    .register-form {
+        padding: 0 10px;
     }
 
+    .form-step input,
+    .form-step select,
+    .form-step textarea,
+    .form-step button,
+    #nameNextBtn,
+    #googleRegisterButton {
+        font-size: 14px;
+        padding: 12px 20px;
+    }
+
+    #cropperContainer,
     #cropperImage {
-        max-height: 400px;
+        max-height: 250px;
     }
 
     #imagePreviewContainer img {
-        width: 80px;
-        height: 80px;
-    }
-
-    #cropButton {
-        padding: 8px 16px;
-        font-size: 14px;
+        width: 60px;
+        height: 60px;
     }
 }
