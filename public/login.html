@@ -14,18 +14,18 @@
         <h1>Login</h1>
     </header>
     <h2 class="section-header">Login</h2>
-    <main class="main-content" role="main">
-        <form id="loginForm" class="login-form">
+    <div class="main-content" role="main">
+        <form class="login-form">
           <div class="input-group">
-            <input type="email" id="email" name="email" required placeholder="E-Mail">
+            <input type="email" placeholder="Email" required>
           </div>
           <div class="input-group">
-            <input type="password" id="password" name="password" required placeholder="Passwort">
+            <input type="password" placeholder="Password" required>
           </div>
-          <button type="submit" class="button">Login</button>
-          <button id="googleLoginButton" class="button google-button">Login with Google</button>
-        </form>
-                     
+          <button type="submit" class="login-button">Login</button>
+          <div class="divider">or</div>
+          <button type="button" class="google-button">Login with Google</button>
+        </form>                    
         <div id="confirmationPopup" class="hidden">
           <p id="confirmationMessage"></p>
           <button id="confirmButton">Confirm</button>

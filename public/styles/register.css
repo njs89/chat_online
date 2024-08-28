@@ -22,18 +22,19 @@
 .form-step select,
 .form-step textarea {
     width: 100%;
-    padding: 10px;
+    padding: 15px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 5px;
     font-size: 16px;
+    box-sizing: border-box;
 }
 
 .form-step button {
-    padding: 10px 20px;
+    padding: 15px 30px;
     background-color: var(--company-color);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease;
@@ -41,6 +42,12 @@
 
 .form-step button:hover {
     background-color: var(--company-color-hover);
+}
+
+/* Style for the first Next button */
+#nameNextBtn {
+    width: 100%;
+    margin-top: 15px;
 }
 
 .button-group {
@@ -52,11 +59,6 @@
 .button-group button {
     flex: 0 0 48%; /* This makes each button take up 48% of the container width */
 }
-/* If you want to change the order of the buttons */
-/*.button-group {
-    flex-direction: row-reverse;
-}*/
-
 
 .registration-options {
     display: flex;
@@ -79,13 +81,45 @@
     background-color: #357ae8;
 }
 
+/* Responsive styles for mobile devices */
 @media (max-width: 768px) {
     .register-form {
         padding: 0 20px;
     }
+
+    .form-step input,
+    .form-step select,
+    .form-step textarea {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .form-step button {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+
+    #nameNextBtn {
+        width: 100%;
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .button-group button {
+        flex: none;
+        width: 100%;
+    }
+
+    /* Ensure the Google button is full width on mobile */
+    #googleRegisterButton {
+        width: 100%;
+    }
 }
 
-/* crop images */
+/* Existing styles for image cropping and preview */
 #cropperContainer {
     max-width: 100%;
     max-height: 600px;
@@ -100,7 +134,7 @@
 
 #cropButton {
     margin-top: 10px;
-    display: none; /* Initially hidden, will be shown when an image is selected */
+    display: none;
 }
 
 #imagePreviewContainer {
@@ -127,7 +161,7 @@
 }
 
 #cropButton {
-    display: none; /* Initially hidden */
+    display: none;
     margin-top: 10px;
     padding: 10px 20px;
     background-color: var(--company-color);
@@ -140,4 +174,25 @@
 
 #cropButton:hover {
     background-color: var(--company-color-hover);
+}
+
+/* Additional mobile styles for image-related elements */
+@media (max-width: 768px) {
+    #cropperContainer {
+        max-height: 400px;
+    }
+
+    #cropperImage {
+        max-height: 400px;
+    }
+
+    #imagePreviewContainer img {
+        width: 80px;
+        height: 80px;
+    }
+
+    #cropButton {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
 }
