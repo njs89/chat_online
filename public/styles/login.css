@@ -46,7 +46,7 @@
     transition: all 0.3s ease;
 }
 
-.login-button, .google-button {
+.login-button, .googleLoginButton {
     width: 100%;
     padding: 15px 30px;
     border: none;
@@ -69,12 +69,12 @@
     background-color: var(--company-color-hover);
 }
 
-.google-button {
+.googleLoginButton {
     background-color: #4285F4;
     color: white;
 }
 
-.google-button:hover {
+.googleLoginButton:hover {
     background-color: #357AE8;
 }
 
@@ -102,7 +102,7 @@
         padding: 0 20px;
         box-sizing: border-box;
     }
-    .login-button, .google-button {
+    .login-button, .googleLoginButton {
         width: 100%;
         max-width: none;
     }
