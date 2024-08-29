@@ -1,3 +1,11 @@
-too muich space between profile and button menu. less padding? padding depending on OS? (iOS seems larger browserurl Thing)
-profile: too wide, screen is srollable
-Match Looks fine now!
+IOS design: Bottm menu is covered by URL bar in Safari. Ignore this and check, how it Looks as app???
+I think the menu Icons are a bit too smal on my Android.
+We Need a Symbol for new Matches/Messages.
+New Matches should also be highlited in the Chat.
+Counter in menu on Chat for amount of Messages in total/Chats with Messages
+Counter in Chat.html on each Name for amount of new Messages
+Popup or counter for new Matches?
+Button for Video call in Chat 
+Also in Chat somehow a Connection from Chat to user
+
+29.08.24 bbefore Chat changes: 0461b3be84f6a3c3c378fa4c7ec063982773a619
